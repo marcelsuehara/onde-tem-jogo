@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Tv, Calendar, Search, Trophy, RefreshCw, AlertCircle, Newspaper, ExternalLink, MapPin, Shield, UserCheck, LayoutGrid, ListOrdered } from 'lucide-react';
+import { Tv, Calendar, Search, Trophy, RefreshCw, AlertCircle, Newspaper, ExternalLink, MapPin, Shield, UserCheck, ListOrdered } from 'lucide-react';
 
 // Escudos Padronizados
 const BRASIL_TEAMS = [
@@ -17,7 +17,7 @@ const BRASIL_TEAMS = [
   { id: 12, name: "Cruzeiro", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9782.png", state: "MG", stadium: "Mineirão" }
 ];
 
-// Dados das Tabelas de Classificação
+// Tabelas de Classificação Completas (incluindo Brasileirão Feminino)
 const STANDINGS_DATA = {
   "Brasileirão Série A": [
     { pos: 1, name: "Botafogo", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8517.png", pts: 56, pj: 27, v: 17, e: 5, d: 5, sg: 22, status: "libertadores" },
@@ -31,26 +31,46 @@ const STANDINGS_DATA = {
     { pos: 17, name: "Corinthians", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10272.png", pts: 28, pj: 27, v: 6, e: 10, d: 11, sg: -8, status: "z4" },
     { pos: 18, name: "Fluminense", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10274.png", pts: 27, pj: 26, v: 7, e: 6, d: 13, sg: -9, status: "z4" }
   ],
+  "Brasileirão Feminino": [
+    { pos: 1, name: "Corinthians (Fem)", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10272.png", pts: 40, pj: 15, v: 13, e: 1, d: 1, sg: 32, status: "g4" },
+    { pos: 2, name: "Palmeiras (Fem)", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10283.png", pts: 34, pj: 15, v: 11, e: 1, d: 3, sg: 21, status: "g4" },
+    { pos: 3, name: "Ferroviária (Fem)", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/652034.png", pts: 32, pj: 15, v: 9, e: 5, d: 1, sg: 14, status: "g4" },
+    { pos: 4, name: "São Paulo (Fem)", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10277.png", pts: 30, pj: 15, v: 9, e: 3, d: 3, sg: 18, status: "g4" },
+    { pos: 5, name: "Internacional (Fem)", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8632.png", pts: 23, pj: 15, v: 6, e: 5, d: 4, sg: 4, status: "normal" }
+  ],
   "Brasileirão Série B": [
     { pos: 1, name: "Novorizontino", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/652033.png", pts: 51, pj: 28, v: 15, e: 6, d: 7, sg: 11, status: "g4" },
     { pos: 2, name: "Santos", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10276.png", pts: 50, pj: 28, v: 14, e: 8, d: 6, sg: 21, status: "g4" },
     { pos: 3, name: "Sport", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10279.png", pts: 46, pj: 27, v: 13, e: 7, d: 7, sg: 10, status: "g4" },
-    { pos: 4, name: "Vila Nova", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9780.png", pts: 45, pj: 28, v: 13, e: 6, d: 9, sg: 3, status: "g4" },
-    { pos: 5, name: "Ceará", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10284.png", pts: 42, pj: 28, v: 12, e: 6, d: 10, sg: 11, status: "normal" }
+    { pos: 4, name: "Vila Nova", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9780.png", pts: 45, pj: 28, v: 13, e: 6, d: 9, sg: 3, status: "g4" }
+  ],
+  "Premier League (Inglaterra)": [
+    { pos: 1, name: "Manchester City", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8456.png", pts: 13, pj: 5, v: 4, e: 1, d: 0, sg: 8, status: "champions" },
+    { pos: 2, name: "Liverpool", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8650.png", pts: 12, pj: 5, v: 4, e: 0, d: 1, sg: 9, status: "champions" },
+    { pos: 3, name: "Aston Villa", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10252.png", pts: 12, pj: 5, v: 4, e: 0, d: 1, sg: 3, status: "champions" },
+    { pos: 4, name: "Arsenal", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9825.png", pts: 11, pj: 5, v: 3, e: 2, d: 0, sg: 5, status: "champions" }
+  ],
+  "Liga Portugal": [
+    { pos: 1, name: "Sporting CP", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9768.png", pts: 18, pj: 6, v: 6, e: 0, d: 0, sg: 17, status: "champions" },
+    { pos: 2, name: "FC Porto", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9773.png", pts: 15, pj: 6, v: 5, e: 0, d: 1, sg: 12, status: "champions" },
+    { pos: 3, name: "SL Benfica", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9772.png", pts: 13, pj: 5, v: 4, e: 1, d: 0, sg: 8, status: "pre-libertadores" }
+  ],
+  "Ligue 1 (França)": [
+    { pos: 1, name: "Paris Saint-Germain", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9847.png", pts: 13, pj: 5, v: 4, e: 1, d: 0, sg: 13, status: "champions" },
+    { pos: 2, name: "Marseille", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8586.png", pts: 13, pj: 5, v: 4, e: 1, d: 0, sg: 9, status: "champions" },
+    { pos: 3, name: "Monaco", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9829.png", pts: 13, pj: 5, v: 4, e: 1, d: 0, sg: 8, status: "champions" }
   ],
   "La Liga (Espanha)": [
     { pos: 1, name: "Barcelona", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8634.png", pts: 21, pj: 7, v: 7, e: 0, d: 0, sg: 18, status: "champions" },
-    { pos: 2, name: "Real Madrid", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8633.png", pts: 17, pj: 7, v: 5, e: 2, d: 0, sg: 11, status: "champions" },
-    { pos: 3, name: "Athletic Bilbao", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8315.png", pts: 13, pj: 7, v: 4, e: 1, d: 2, sg: 5, status: "champions" },
-    { pos: 4, name: "Atlético de Madrid", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9906.png", pts: 12, pj: 6, v: 3, e: 3, d: 0, sg: 8, status: "champions" }
+    { pos: 2, name: "Real Madrid", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8633.png", pts: 17, pj: 7, v: 5, e: 2, d: 0, sg: 11, status: "champions" }
   ],
   "Bundesliga (Alemanha)": [
     { pos: 1, name: "Bayern de Munique", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9823.png", pts: 12, pj: 4, v: 4, e: 0, d: 0, sg: 11, status: "champions" },
-    { pos: 2, name: "Bayer Leverkusen", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8178.png", pts: 9, pj: 4, v: 3, e: 0, d: 1, sg: 4, status: "champions" },
-    { pos: 3, name: "Borussia Dortmund", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9789.png", pts: 7, pj: 4, v: 2, e: 1, d: 1, sg: 2, status: "champions" }
+    { pos: 2, name: "Bayer Leverkusen", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8178.png", pts: 9, pj: 4, v: 3, e: 0, d: 1, sg: 4, status: "champions" }
   ]
 };
 
+// Partidas incluindo Futebol Feminino, Série B e Seleções
 const EXTRA_MATCHES = [
   {
     id: 9001,
@@ -75,6 +95,18 @@ const EXTRA_MATCHES = [
     awayTeam: { name: "Operário-PR", shortName: "Operário", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/321853.png" },
     venue: "Vila Belmiro",
     broadcaster: "Premiere / SporTV"
+  },
+  {
+    id: 9003,
+    utcDate: new Date("2026-09-29T19:00:00Z").toISOString(),
+    status: "TIMED",
+    stage: "Reta Final",
+    categoryTag: "Feminino • Profissional",
+    competition: { name: "Brasileirão Feminino" },
+    homeTeam: { name: "Corinthians (Fem)", shortName: "Corinthians Fem", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10272.png" },
+    awayTeam: { name: "Palmeiras (Fem)", shortName: "Palmeiras Fem", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10283.png" },
+    venue: "Neo Química Arena",
+    broadcaster: "SporTV / TV Brasil"
   }
 ];
 
@@ -97,16 +129,16 @@ const initialNews = [
   },
   {
     id: 3,
-    title: "Guia Completo de Transmissões: Onde assistir ao futebol europeu e nacional",
-    summary: "Confira horários e canais de TV de todas as partidas da semana na Série A, B e Europa.",
-    category: "Guia de TV",
+    title: "Brasileirão Feminino e Séries A e B em destaque nos canais de esporte",
+    summary: "Confira horários e canais de TV de todas as partidas da semana no futebol nacional e internacional.",
+    category: "Feminino & Guias de TV",
     date: "26/09/2026",
     url: "https://uol.com.br/esporte"
   }
 ];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('matches'); // 'matches' | 'standings'
+  const [activeTab, setActiveTab] = useState('matches');
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -174,7 +206,7 @@ export default function App() {
               <h1 className="text-xl font-black tracking-tight text-white flex items-center gap-1.5">
                 Onde tem Jogo? <span className="text-xs font-bold bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">AO VIVO</span>
               </h1>
-              <p className="text-xs text-slate-400">Guia de Partidas, Tabelas, Estádios e Transmissões</p>
+              <p className="text-xs text-slate-400">Guia de Partidas, Tabelas, Feminino e Transmissões</p>
             </div>
           </div>
 
@@ -257,13 +289,12 @@ export default function App() {
         {/* ABA 1: PRÓXIMOS JOGOS */}
         {activeTab === 'matches' && (
           <div className="space-y-6">
-            {/* Busca e Filtros */}
             <div className="space-y-3">
               <div className="relative">
                 <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input 
                   type="text" 
-                  placeholder="Buscar por time, categoria (ex: Sub-17, Feminino), estádio..."
+                  placeholder="Buscar por time, categoria (ex: Feminino, Sub-20), estádio..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
@@ -472,7 +503,7 @@ export default function App() {
           </div>
         )}
 
-        {/* Seção de Notícias e Guias (AdSense) */}
+        {/* Seção de Notícias */}
         <section className="space-y-4 pt-6 border-t border-slate-800">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
