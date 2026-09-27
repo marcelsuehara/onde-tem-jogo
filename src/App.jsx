@@ -7,31 +7,31 @@ export default function App() {
   const [selectedChannel, setSelectedChannel] = useState('todos');
   const [selectedTeam, setSelectedTeam] = useState(null);
 
-  // Escudos em CDN pública confiável e leve em PNG
+  // Escudos oficiais via Wikimedia PNG
   const teams = [
-    { id: 'flamengo', name: 'Flamengo', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/flamengo.png' },
-    { id: 'palmeiras', name: 'Palmeiras', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/palmeiras.png' },
-    { id: 'corinthians', name: 'Corinthians', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/corinthians.png' },
-    { id: 'sao-paulo', name: 'São Paulo', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/sao-paulo.png' },
-    { id: 'santos', name: 'Santos', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/santos.png' },
-    { id: 'gremio', name: 'Grêmio', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/gremio.png' },
-    { id: 'internacional', name: 'Internacional', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/internacional.png' },
-    { id: 'botafogo', name: 'Botafogo', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/botafogo.png' },
-    { id: 'fluminense', name: 'Fluminense', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/fluminense.png' },
-    { id: 'vasco', name: 'Vasco', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/vasco.png' },
-    { id: 'cruzeiro', name: 'Cruzeiro', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/cruzeiro.png' },
-    { id: 'atletico-mg', name: 'Atlético-MG', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/atletico-mg.png' },
-    { id: 'bahia', name: 'Bahia', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/bahia.png' },
-    { id: 'sport', name: 'Sport', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/sport.png' },
+    { id: 'flamengo', name: 'Flamengo', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Flamengo_brazilian_football_club_logo.svg/120px-Flamengo_brazilian_football_club_logo.svg.png' },
+    { id: 'palmeiras', name: 'Palmeiras', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Palmeiras_logo.svg/120px-Palmeiras_logo.svg.png' },
+    { id: 'corinthians', name: 'Corinthians', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Sport_Club_Corinthians_Paulista_crest.svg/120px-Sport_Club_Corinthians_Paulista_crest.svg.png' },
+    { id: 'sao-paulo', name: 'São Paulo', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Brasao_do_Sao_Paulo_Futebol_Clube.svg/120px-Brasao_do_Sao_Paulo_Futebol_Clube.svg.png' },
+    { id: 'santos', name: 'Santos', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Santos_Logo.digital.png/120px-Santos_Logo.digital.png' },
+    { id: 'gremio', name: 'Grêmio', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Gremio_logo.svg/120px-Gremio_logo.svg.png' },
+    { id: 'internacional', name: 'Internacional', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Escudo_do_Sport_Club_Internacional.svg/120px-Escudo_do_Sport_Club_Internacional.svg.png' },
+    { id: 'botafogo', name: 'Botafogo', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Botafogo_de_Futebol_e_Regatas_logo.svg/120px-Botafogo_de_Futebol_e_Regatas_logo.svg.png' },
+    { id: 'fluminense', name: 'Fluminense', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Fluminense_FC_escudo.svg/120px-Fluminense_FC_escudo.svg.png' },
+    { id: 'vasco', name: 'Vasco', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Vasco_Da_Gama_Logo.png/120px-Vasco_Da_Gama_Logo.png' },
+    { id: 'cruzeiro', name: 'Cruzeiro', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Cruzeiro_Esporte_Clube_%28logo_2021%29.svg/120px-Cruzeiro_Esporte_Clube_%28logo_2021%29.svg.png' },
+    { id: 'atletico-mg', name: 'Atlético-MG', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Clube_Atl%C3%A9tico_Mineiro_logo.svg/120px-Clube_Atl%C3%A9tico_Mineiro_logo.svg.png' },
+    { id: 'bahia', name: 'Bahia', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/ECBahia_vetor.svg/120px-ECBahia_vetor.svg.png' },
+    { id: 'sport', name: 'Sport', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Sport_Club_do_Recife.svg/120px-Sport_Club_do_Recife.svg.png' },
   ];
 
   const matches = [
     {
       id: 1,
       homeTeam: 'Flamengo',
-      homeBadge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/flamengo.png',
+      homeBadge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Flamengo_brazilian_football_club_logo.svg/120px-Flamengo_brazilian_football_club_logo.svg.png',
       awayTeam: 'Palmeiras',
-      awayBadge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/palmeiras.png',
+      awayBadge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Palmeiras_logo.svg/120px-Palmeiras_logo.svg.png',
       time: 'AO VIVO - 32 min',
       isLive: true,
       channels: ['Globo', 'Premiere'],
@@ -42,9 +42,9 @@ export default function App() {
     {
       id: 2,
       homeTeam: 'Corinthians',
-      homeBadge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/corinthians.png',
+      homeBadge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Sport_Club_Corinthians_Paulista_crest.svg/120px-Sport_Club_Corinthians_Paulista_crest.svg.png',
       awayTeam: 'São Paulo',
-      awayBadge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/sao-paulo.png',
+      awayBadge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Brasao_do_Sao_Paulo_Futebol_Clube.svg/120px-Brasao_do_Sao_Paulo_Futebol_Clube.svg.png',
       time: '18:30',
       isLive: false,
       channels: ['CazéTV', 'Premiere'],
@@ -55,9 +55,9 @@ export default function App() {
     {
       id: 3,
       homeTeam: 'Santos',
-      homeBadge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/santos.png',
+      homeBadge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Santos_Logo.digital.png/120px-Santos_Logo.digital.png',
       awayTeam: 'Sport',
-      awayBadge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/sport.png',
+      awayBadge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Sport_Club_do_Recife.svg/120px-Sport_Club_do_Recife.svg.png',
       time: '21:30',
       isLive: false,
       channels: ['Sportv', 'Premiere'],
@@ -159,10 +159,7 @@ export default function App() {
                     src={team.badge} 
                     alt={team.name} 
                     className="w-10 h-10 object-contain mb-1"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'https://via.placeholder.com/40?text=';
-                    }}
+                    loading="lazy"
                   />
                   <span className="text-[11px] font-medium text-slate-300 truncate max-w-[64px]">{team.name}</span>
                 </button>
@@ -171,7 +168,7 @@ export default function App() {
           </div>
         </section>
 
-        {/* Filtro por Time */}
+        {/* Filtro por Time Selecionado */}
         {selectedTeam && (
           <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-2xl flex items-center justify-between">
             <div className="flex items-center gap-3">
