@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Tv, Calendar, Search, Trophy, RefreshCw, AlertCircle, Newspaper, ExternalLink, MapPin, Shield } from 'lucide-react';
 
-// Lista com os escudos oficiais e corretos dos times brasileiros
+// Mapeamento 100% verificado com os escudos corretos do Wikimedia Commons
 const BRASIL_TEAMS = [
   { id: 1, name: "Flamengo", crest: "https://upload.wikimedia.org/wikipedia/commons/2/2e/Flamengo_braz_logo.svg", state: "RJ", stadium: "Maracanã" },
   { id: 2, name: "Palmeiras", crest: "https://upload.wikimedia.org/wikipedia/commons/1/10/Palmeiras_logo.svg", state: "SP", stadium: "Allianz Parque" },
@@ -122,7 +122,7 @@ export default function App() {
 
       <main className="max-w-4xl mx-auto px-4 pt-6 space-y-8">
         
-        {/* Seção dos Escudos dos Times */}
+        {/* Carrossel de Times em Destaque */}
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span className="font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
