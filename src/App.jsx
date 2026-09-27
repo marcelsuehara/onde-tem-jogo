@@ -7,31 +7,31 @@ export default function App() {
   const [selectedChannel, setSelectedChannel] = useState('todos');
   const [selectedTeam, setSelectedTeam] = useState(null);
 
-  // Escudos oficiais via Wikipédia/Wikimedia (Links públicos e estáveis)
+  // Escudos em CDN pública confiável e leve em PNG
   const teams = [
-    { id: 'flamengo', name: 'Flamengo', badge: 'https://upload.wikimedia.org/wikipedia/commons/2/2e/Flamengo_braz_logo.svg' },
-    { id: 'palmeiras', name: 'Palmeiras', badge: 'https://upload.wikimedia.org/wikipedia/commons/1/10/Palmeiras_logo.svg' },
-    { id: 'corinthians', name: 'Corinthians', badge: 'https://upload.wikimedia.org/wikipedia/pt/b/b4/Corinthians_simbolo.svg' },
-    { id: 'sao-paulo', name: 'São Paulo', badge: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Brasao_do_Sao_Paulo_Futebol_Clube.svg' },
-    { id: 'santos', name: 'Santos', badge: 'https://upload.wikimedia.org/wikipedia/commons/3/35/Santos_logo.svg' },
-    { id: 'gremio', name: 'Grêmio', badge: 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Gremio-logo.svg' },
-    { id: 'internacional', name: 'Internacional', badge: 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Escudo_do_Sport_Club_Internacional.svg' },
-    { id: 'botafogo', name: 'Botafogo', badge: 'https://upload.wikimedia.org/wikipedia/commons/5/52/Botafogo_de_Futebol_e_Regatas_logo.svg' },
-    { id: 'fluminense', name: 'Fluminense', badge: 'https://upload.wikimedia.org/wikipedia/pt/a/a3/FFC_logo.svg' },
-    { id: 'vasco', name: 'Vasco', badge: 'https://upload.wikimedia.org/wikipedia/pt/a/ac/CRVascodaGama.svg' },
-    { id: 'cruzeiro', name: 'Cruzeiro', badge: 'https://upload.wikimedia.org/wikipedia/commons/9/90/Cruzeiro_Esporte_Clube_%28logo_2021%29.svg' },
-    { id: 'atletico-mg', name: 'Atlético-MG', badge: 'https://upload.wikimedia.org/wikipedia/commons/5/5f/Clube_Atl%C3%A9tico_Mineiro_logo.svg' },
-    { id: 'bahia', name: 'Bahia', badge: 'https://upload.wikimedia.org/wikipedia/pt/2/2c/Esporte_Clube_Bahia_logo.svg' },
-    { id: 'sport', name: 'Sport', badge: 'https://upload.wikimedia.org/wikipedia/pt/1/17/Sport_Club_do_Recife.svg' },
+    { id: 'flamengo', name: 'Flamengo', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/flamengo.png' },
+    { id: 'palmeiras', name: 'Palmeiras', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/palmeiras.png' },
+    { id: 'corinthians', name: 'Corinthians', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/corinthians.png' },
+    { id: 'sao-paulo', name: 'São Paulo', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/sao-paulo.png' },
+    { id: 'santos', name: 'Santos', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/santos.png' },
+    { id: 'gremio', name: 'Grêmio', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/gremio.png' },
+    { id: 'internacional', name: 'Internacional', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/internacional.png' },
+    { id: 'botafogo', name: 'Botafogo', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/botafogo.png' },
+    { id: 'fluminense', name: 'Fluminense', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/fluminense.png' },
+    { id: 'vasco', name: 'Vasco', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/vasco.png' },
+    { id: 'cruzeiro', name: 'Cruzeiro', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/cruzeiro.png' },
+    { id: 'atletico-mg', name: 'Atlético-MG', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/atletico-mg.png' },
+    { id: 'bahia', name: 'Bahia', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/bahia.png' },
+    { id: 'sport', name: 'Sport', badge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/sport.png' },
   ];
 
   const matches = [
     {
       id: 1,
       homeTeam: 'Flamengo',
-      homeBadge: 'https://upload.wikimedia.org/wikipedia/commons/2/2e/Flamengo_braz_logo.svg',
+      homeBadge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/flamengo.png',
       awayTeam: 'Palmeiras',
-      awayBadge: 'https://upload.wikimedia.org/wikipedia/commons/1/10/Palmeiras_logo.svg',
+      awayBadge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/palmeiras.png',
       time: 'AO VIVO - 32 min',
       isLive: true,
       channels: ['Globo', 'Premiere'],
@@ -42,9 +42,9 @@ export default function App() {
     {
       id: 2,
       homeTeam: 'Corinthians',
-      homeBadge: 'https://upload.wikimedia.org/wikipedia/pt/b/b4/Corinthians_simbolo.svg',
+      homeBadge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/corinthians.png',
       awayTeam: 'São Paulo',
-      awayBadge: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Brasao_do_Sao_Paulo_Futebol_Clube.svg',
+      awayBadge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/sao-paulo.png',
       time: '18:30',
       isLive: false,
       channels: ['CazéTV', 'Premiere'],
@@ -55,9 +55,9 @@ export default function App() {
     {
       id: 3,
       homeTeam: 'Santos',
-      homeBadge: 'https://upload.wikimedia.org/wikipedia/commons/3/35/Santos_logo.svg',
+      homeBadge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/santos.png',
       awayTeam: 'Sport',
-      awayBadge: 'https://upload.wikimedia.org/wikipedia/pt/1/17/Sport_Club_do_Recife.svg',
+      awayBadge: 'https://raw.githubusercontent.com/futebol-dados/escudos/main/br/sport.png',
       time: '21:30',
       isLive: false,
       channels: ['Sportv', 'Premiere'],
@@ -155,7 +155,15 @@ export default function App() {
                       : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50'
                   }`}
                 >
-                  <img src={team.badge} alt={team.name} className="w-10 h-10 object-contain mb-1" />
+                  <img 
+                    src={team.badge} 
+                    alt={team.name} 
+                    className="w-10 h-10 object-contain mb-1"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = 'https://via.placeholder.com/40?text=';
+                    }}
+                  />
                   <span className="text-[11px] font-medium text-slate-300 truncate max-w-[64px]">{team.name}</span>
                 </button>
               );
