@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tv, Calendar, Search, Newspaper, ChevronRight, Trophy, Sparkles, Filter, X } from 'lucide-react';
+import { Tv, Calendar, Search, Newspaper, Trophy, Sparkles, Filter, X } from 'lucide-react';
 
 export default function App() {
   const [selectedCategory, setSelectedCategory] = useState('hoje');
@@ -7,66 +7,63 @@ export default function App() {
   const [selectedChannel, setSelectedChannel] = useState('todos');
   const [selectedTeam, setSelectedTeam] = useState(null);
 
-  // Lista de clubes da Série A e B com escudos oficiais (SVG/PNG otimizados)
+  // Escudos oficiais via Wikipédia/Wikimedia (Links públicos e estáveis)
   const teams = [
-    { id: 'flamengo', name: 'Flamengo', badge: 'https://media.api-sports.io/football/teams/127.png' },
-    { id: 'palmeiras', name: 'Palmeiras', badge: 'https://media.api-sports.io/football/teams/121.png' },
-    { id: 'corinthians', name: 'Corinthians', badge: 'https://media.api-sports.io/football/teams/131.png' },
-    { id: 'sao-paulo', name: 'São Paulo', badge: 'https://media.api-sports.io/football/teams/126.png' },
-    { id: 'santos', name: 'Santos', badge: 'https://media.api-sports.io/football/teams/124.png' },
-    { id: 'gremio', name: 'Grêmio', badge: 'https://media.api-sports.io/football/teams/130.png' },
-    { id: 'internacional', name: 'Internacional', badge: 'https://media.api-sports.io/football/teams/119.png' },
-    { id: 'botafogo', name: 'Botafogo', badge: 'https://media.api-sports.io/football/teams/120.png' },
-    { id: 'fluminense', name: 'Fluminense', badge: 'https://media.api-sports.io/football/teams/128.png' },
-    { id: 'vasco', name: 'Vasco', badge: 'https://media.api-sports.io/football/teams/133.png' },
-    { id: 'cruzeiro', name: 'Cruzeiro', badge: 'https://media.api-sports.io/football/teams/135.png' },
-    { id: 'atletico-mg', name: 'Atlético-MG', badge: 'https://media.api-sports.io/football/teams/1062.png' },
-    { id: 'bahia', name: 'Bahia', badge: 'https://media.api-sports.io/football/teams/118.png' },
-    { id: 'sport', name: 'Sport', badge: 'https://media.api-sports.io/football/teams/132.png' },
+    { id: 'flamengo', name: 'Flamengo', badge: 'https://upload.wikimedia.org/wikipedia/commons/2/2e/Flamengo_braz_logo.svg' },
+    { id: 'palmeiras', name: 'Palmeiras', badge: 'https://upload.wikimedia.org/wikipedia/commons/1/10/Palmeiras_logo.svg' },
+    { id: 'corinthians', name: 'Corinthians', badge: 'https://upload.wikimedia.org/wikipedia/pt/b/b4/Corinthians_simbolo.svg' },
+    { id: 'sao-paulo', name: 'São Paulo', badge: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Brasao_do_Sao_Paulo_Futebol_Clube.svg' },
+    { id: 'santos', name: 'Santos', badge: 'https://upload.wikimedia.org/wikipedia/commons/3/35/Santos_logo.svg' },
+    { id: 'gremio', name: 'Grêmio', badge: 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Gremio-logo.svg' },
+    { id: 'internacional', name: 'Internacional', badge: 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Escudo_do_Sport_Club_Internacional.svg' },
+    { id: 'botafogo', name: 'Botafogo', badge: 'https://upload.wikimedia.org/wikipedia/commons/5/52/Botafogo_de_Futebol_e_Regatas_logo.svg' },
+    { id: 'fluminense', name: 'Fluminense', badge: 'https://upload.wikimedia.org/wikipedia/pt/a/a3/FFC_logo.svg' },
+    { id: 'vasco', name: 'Vasco', badge: 'https://upload.wikimedia.org/wikipedia/pt/a/ac/CRVascodaGama.svg' },
+    { id: 'cruzeiro', name: 'Cruzeiro', badge: 'https://upload.wikimedia.org/wikipedia/commons/9/90/Cruzeiro_Esporte_Clube_%28logo_2021%29.svg' },
+    { id: 'atletico-mg', name: 'Atlético-MG', badge: 'https://upload.wikimedia.org/wikipedia/commons/5/5f/Clube_Atl%C3%A9tico_Mineiro_logo.svg' },
+    { id: 'bahia', name: 'Bahia', badge: 'https://upload.wikimedia.org/wikipedia/pt/2/2c/Esporte_Clube_Bahia_logo.svg' },
+    { id: 'sport', name: 'Sport', badge: 'https://upload.wikimedia.org/wikipedia/pt/1/17/Sport_Club_do_Recife.svg' },
   ];
 
   const matches = [
     {
       id: 1,
       homeTeam: 'Flamengo',
-      homeBadge: 'https://media.api-sports.io/football/teams/127.png',
+      homeBadge: 'https://upload.wikimedia.org/wikipedia/commons/2/2e/Flamengo_braz_logo.svg',
       awayTeam: 'Palmeiras',
-      awayBadge: 'https://media.api-sports.io/football/teams/121.png',
+      awayBadge: 'https://upload.wikimedia.org/wikipedia/commons/1/10/Palmeiras_logo.svg',
       time: 'AO VIVO - 32 min',
       isLive: true,
       channels: ['Globo', 'Premiere'],
       league: 'Brasileirão Série A',
       stadium: 'Maracanã, Rio de Janeiro',
-      category: 'hoje',
-      summary: 'Duelo direto pela liderança do campeonato. Flamengo pressiona no início com grande atuação do meio-campo.'
+      category: 'hoje'
     },
     {
       id: 2,
       homeTeam: 'Corinthians',
-      homeBadge: 'https://media.api-sports.io/football/teams/131.png',
+      homeBadge: 'https://upload.wikimedia.org/wikipedia/pt/b/b4/Corinthians_simbolo.svg',
       awayTeam: 'São Paulo',
-      awayBadge: 'https://media.api-sports.io/football/teams/126.png',
+      awayBadge: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Brasao_do_Sao_Paulo_Futebol_Clube.svg',
       time: '18:30',
       isLive: false,
       channels: ['CazéTV', 'Premiere'],
       league: 'Brasileirão Série A',
       stadium: 'Neo Química Arena, São Paulo',
-      category: 'hoje',
-      summary: 'Clássico Majestoso na Neo Química Arena. Ambas as equipes buscam colar no G-4 da competição.'
+      category: 'hoje'
     },
     {
       id: 3,
       homeTeam: 'Santos',
-      homeBadge: 'https://media.api-sports.io/football/teams/124.png',
+      homeBadge: 'https://upload.wikimedia.org/wikipedia/commons/3/35/Santos_logo.svg',
       awayTeam: 'Sport',
-      awayBadge: 'https://media.api-sports.io/football/teams/132.png',
+      awayBadge: 'https://upload.wikimedia.org/wikipedia/pt/1/17/Sport_Club_do_Recife.svg',
       time: '21:30',
       isLive: false,
       channels: ['Sportv', 'Premiere'],
       league: 'Brasileirão Série B',
       stadium: 'Vila Belmiro, Santos',
-      category: 'hoje',
-      summary: 'Confronto decisivo no topo da tabela da Série B. Expectativa de casa cheia na Vila Belmiro.'
+      category: 'hoje'
     }
   ];
 
@@ -94,7 +91,6 @@ export default function App() {
     }
   ];
 
-  // Filtro de jogos
   const filteredMatches = matches.filter(match => {
     const matchesSearch = match.homeTeam.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           match.awayTeam.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -130,7 +126,7 @@ export default function App() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 pt-6 space-y-6">
-        {/* Carrossel de Escudos dos Clubes */}
+        {/* Carrossel de Escudos */}
         <section className="bg-slate-900 p-4 rounded-2xl border border-slate-800/80 shadow-lg">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
@@ -167,7 +163,7 @@ export default function App() {
           </div>
         </section>
 
-        {/* Filtro do Time Selecionado (se houver) */}
+        {/* Filtro por Time */}
         {selectedTeam && (
           <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-2xl flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -186,7 +182,7 @@ export default function App() {
           </div>
         )}
 
-        {/* Campo de Busca e Filtros Rápido */}
+        {/* Campo de Busca e Filtros */}
         <div className="space-y-3">
           <div className="relative">
             <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -199,7 +195,6 @@ export default function App() {
             />
           </div>
 
-          {/* Seleção de Canais */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
             <span className="text-slate-400 flex items-center gap-1 font-medium pr-1">
               <Filter className="w-3.5 h-3.5" /> Canais:
@@ -249,7 +244,6 @@ export default function App() {
                   <span>{match.stadium}</span>
                 </div>
 
-                {/* Confronto */}
                 <div className="grid grid-cols-3 items-center text-center">
                   <div className="flex flex-col items-center space-y-2">
                     <img src={match.homeBadge} alt={match.homeTeam} className="w-12 h-12 object-contain" />
@@ -270,7 +264,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Onde Assistir */}
                 <div className="bg-slate-950/60 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border border-slate-800/40">
                   <div className="flex items-center space-x-2">
                     <Tv className="w-4 h-4 text-slate-400" />
@@ -289,7 +282,7 @@ export default function App() {
           )}
         </section>
 
-        {/* Seção de Notícias Rápida (Essencial para Monetização) */}
+        {/* Guia de Notícias */}
         <section className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
