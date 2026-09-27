@@ -1,27 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Tv, Calendar, Search, Trophy, RefreshCw, AlertCircle, Newspaper, ExternalLink, MapPin, Shield } from 'lucide-react';
 
-// Escudos corrigidos de forma absoluta
+// IDs OFICIAIS e ÚNICAS da Football-Data.org para o futebol brasileiro
 const BRASIL_TEAMS = [
-  { id: 1, name: "Flamengo", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/5926.png", state: "RJ", stadium: "Maracanã" },
-  { id: 2, name: "Palmeiras", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10283.png", state: "SP", stadium: "Allianz Parque" },
-  { id: 3, name: "São Paulo", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10277.png", state: "SP", stadium: "MorrumBIS" },
-  { id: 4, name: "Corinthians", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10272.png", state: "SP", stadium: "Neo Química Arena" },
-  { id: 5, name: "Santos", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10276.png", state: "SP", stadium: "Vila Belmiro" },
-  { id: 6, name: "Fluminense", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10274.png", state: "RJ", stadium: "Maracanã" },
-  { id: 7, name: "Vasco da Gama", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10278.png", state: "RJ", stadium: "São Januário" },
-  { id: 8, name: "Botafogo", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8517.png", state: "RJ", stadium: "Nilton Santos" },
-  { id: 9, name: "Grêmio", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10275.png", state: "RS", stadium: "Arena do Grêmio" },
-  { id: 10, name: "Internacional", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8632.png", state: "RS", stadium: "Beira-Rio" },
-  { id: 11, name: "Atlético Mineiro", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10273.png", state: "MG", stadium: "Arena MRV" },
-  { id: 12, name: "Cruzeiro", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9782.png", state: "MG", stadium: "Mineirão" },
-  { id: 13, name: "Bahia", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10281.png", state: "BA", stadium: "Arena Fonte Nova" },
-  { id: 14, name: "Fortaleza", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8287.png", state: "CE", stadium: "Castelão" },
-  { id: 15, name: "Athletico Paranaense", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10280.png", state: "PR", stadium: "Ligga Arena" },
-  { id: 16, name: "Red Bull Bragantino", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10282.png", state: "SP", stadium: "Nabi Abi Chedid" }
+  { id: 1783, name: "Flamengo", crest: "https://crests.football-data.org/1783.png", state: "RJ", stadium: "Maracanã" },
+  { id: 1769, name: "Palmeiras", crest: "https://crests.football-data.org/1769.png", state: "SP", stadium: "Allianz Parque" },
+  { id: 1776, name: "São Paulo", crest: "https://crests.football-data.org/1776.png", state: "SP", stadium: "MorrumBIS" },
+  { id: 1771, name: "Corinthians", crest: "https://crests.football-data.org/1771.png", state: "SP", stadium: "Neo Química Arena" },
+  { id: 1778, name: "Santos", crest: "https://crests.football-data.org/1778.png", state: "SP", stadium: "Vila Belmiro" },
+  { id: 1765, name: "Fluminense", crest: "https://crests.football-data.org/1765.png", state: "RJ", stadium: "Maracanã" },
+  { id: 1780, name: "Vasco da Gama", crest: "https://crests.football-data.org/1780.png", state: "RJ", stadium: "São Januário" },
+  { id: 1770, name: "Botafogo", crest: "https://crests.football-data.org/1770.png", state: "RJ", stadium: "Nilton Santos" },
+  { id: 1767, name: "Grêmio", crest: "https://crests.football-data.org/1767.png", state: "RS", stadium: "Arena do Grêmio" },
+  { id: 1768, name: "Internacional", crest: "https://crests.football-data.org/1768.png", state: "RS", stadium: "Beira-Rio" },
+  { id: 1766, name: "Atlético Mineiro", crest: "https://crests.football-data.org/1766.png", state: "MG", stadium: "Arena MRV" },
+  { id: 1779, name: "Cruzeiro", crest: "https://crests.football-data.org/1779.png", state: "MG", stadium: "Mineirão" },
+  { id: 1777, name: "Bahia", crest: "https://crests.football-data.org/1777.png", state: "BA", stadium: "Arena Fonte Nova" },
+  { id: 1837, name: "Fortaleza", crest: "https://crests.football-data.org/1837.png", state: "CE", stadium: "Castelão" },
+  { id: 1772, name: "Athletico Paranaense", crest: "https://crests.football-data.org/1772.png", state: "PR", stadium: "Ligga Arena" },
+  { id: 1782, name: "Red Bull Bragantino", crest: "https://crests.football-data.org/1782.png", state: "SP", stadium: "Nabi Abi Chedid" }
 ];
 
-// Jogos complementares (Série B / Seleções) para garantir cobertura completa
+// Jogos adicionais padronizados com os escudos oficiais da API + canais de transmissão
 const EXTRA_MATCHES = [
   {
     id: 9001,
@@ -29,9 +29,10 @@ const EXTRA_MATCHES = [
     status: "TIMED",
     matchday: 28,
     competition: { name: "Brasileirão Série B" },
-    homeTeam: { name: "Santos", shortName: "Santos", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10276.png" },
-    awayTeam: { name: "Operário-PR", shortName: "Operário", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/321853.png" },
-    venue: "Vila Belmiro"
+    homeTeam: { name: "Santos", shortName: "Santos", crest: "https://crests.football-data.org/1778.png" },
+    awayTeam: { name: "Operário-PR", shortName: "Operário", crest: "https://crests.football-data.org/764.png" },
+    venue: "Vila Belmiro",
+    broadcaster: "Premiere / SporTV"
   },
   {
     id: 9002,
@@ -39,9 +40,10 @@ const EXTRA_MATCHES = [
     status: "TIMED",
     stage: "Amistoso Internacional",
     competition: { name: "Jogos de Seleções" },
-    homeTeam: { name: "Brasil", shortName: "Brasil", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8256.png" },
-    awayTeam: { name: "Espanha", shortName: "Espanha", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8257.png" },
-    venue: "Santiago Bernabéu"
+    homeTeam: { name: "Brasil", shortName: "Brasil", crest: "https://crests.football-data.org/764.png" },
+    awayTeam: { name: "Espanha", shortName: "Espanha", crest: "https://crests.football-data.org/760.png" },
+    venue: "Santiago Bernabéu",
+    broadcaster: "TV Globo / SporTV"
   }
 ];
 
@@ -90,7 +92,6 @@ export default function App() {
         const data = await res.json();
         apiMatches = data.matches || [];
       }
-      // Combina jogos da API com os jogos complementares (Série B / Seleções)
       setMatches([...apiMatches, ...EXTRA_MATCHES]);
     } catch (err) {
       console.error(err);
@@ -150,7 +151,7 @@ export default function App() {
 
       <main className="max-w-4xl mx-auto px-4 pt-6 space-y-8">
         
-        {/* Carrossel dos Escudos dos Times */}
+        {/* Carrossel de Times em Destaque */}
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span className="font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
@@ -238,7 +239,7 @@ export default function App() {
           </div>
         )}
 
-        {/* Lista de Partidas com Estádio e Rodada */}
+        {/* Lista de Partidas com Estádio, Rodada e Onde Assistir */}
         {!loading && (
           <section className="space-y-4">
             <div className="flex items-center justify-between">
@@ -266,6 +267,7 @@ export default function App() {
                 const homeTeamName = match.homeTeam?.name || '';
                 const foundTeam = BRASIL_TEAMS.find(t => homeTeamName.toLowerCase().includes(t.name.toLowerCase()));
                 const venueName = match.venue || foundTeam?.stadium || 'Estádio a definir';
+                const tvChannel = match.broadcaster || 'Premiere / TV Fechada';
 
                 return (
                   <div key={match.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4 hover:border-slate-700 transition">
@@ -310,9 +312,16 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-800/40 flex items-center justify-center text-xs text-slate-400 gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-                      <span>Local: <strong className="text-slate-200">{venueName}</strong></span>
+                    {/* Rodapé do Card: Localização e Canal de Transmissão */}
+                    <div className="pt-2 border-t border-slate-800/40 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                        <span>Local: <strong className="text-slate-200">{venueName}</strong></span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Tv className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                        <span>Onde assistir: <strong className="text-emerald-400">{tvChannel}</strong></span>
+                      </div>
                     </div>
 
                   </div>
