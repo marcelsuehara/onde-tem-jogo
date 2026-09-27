@@ -1,75 +1,75 @@
 import React, { useState, useEffect } from 'react';
 import { Tv, Calendar, Search, Trophy, RefreshCw, AlertCircle, Newspaper, ExternalLink, MapPin, Shield, UserCheck } from 'lucide-react';
 
-// Escudos Oficiais com URLs de CDN de alta disponibilidade (sem bloqueios CORS/Wikimedia)
+// Escudos Oficiais Corrigidos com URLs públicas diretas e estáveis
 const BRASIL_TEAMS = [
-  { id: 1, name: "Flamengo", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/5926.png", state: "RJ", stadium: "Maracanã" },
-  { id: 2, name: "Palmeiras", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10283.png", state: "SP", stadium: "Allianz Parque" },
-  { id: 3, name: "São Paulo", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10277.png", state: "SP", stadium: "MorrumBIS" },
-  { id: 4, name: "Corinthians", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10272.png", state: "SP", stadium: "Neo Química Arena" },
-  { id: 5, name: "Santos", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10276.png", state: "SP", stadium: "Vila Belmiro" },
-  { id: 6, name: "Fluminense", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10274.png", state: "RJ", stadium: "Maracanã" },
-  { id: 7, name: "Vasco da Gama", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10278.png", state: "RJ", stadium: "São Januário" },
-  { id: 8, name: "Botafogo", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8517.png", state: "RJ", stadium: "Nilton Santos" },
-  { id: 9, name: "Grêmio", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10275.png", state: "RS", stadium: "Arena do Grêmio" },
-  { id: 10, name: "Internacional", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8632.png", state: "RS", stadium: "Beira-Rio" },
-  { id: 11, name: "Atlético Mineiro", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10273.png", state: "MG", stadium: "Arena MRV" },
-  { id: 12, name: "Cruzeiro", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9782.png", state: "MG", stadium: "Mineirão" },
-  { id: 13, name: "Bahia", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10281.png", state: "BA", stadium: "Arena Fonte Nova" },
-  { id: 14, name: "Fortaleza", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8287.png", state: "CE", stadium: "Castelão" },
-  { id: 15, name: "Athletico Paranaense", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10280.png", state: "PR", stadium: "Ligga Arena" },
-  { id: 16, name: "Red Bull Bragantino", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10282.png", state: "SP", stadium: "Nabi Abi Chedid" }
+  { id: 1783, name: "Flamengo", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/flamengo.png", state: "RJ", stadium: "Maracanã" },
+  { id: 1769, name: "Palmeiras", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/palmeiras.png", state: "SP", stadium: "Allianz Parque" },
+  { id: 1776, name: "São Paulo", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/sao_paulo.png", state: "SP", stadium: "MorrumBIS" },
+  { id: 1771, name: "Corinthians", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/corinthians.png", state: "SP", stadium: "Neo Química Arena" },
+  { id: 1778, name: "Santos", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/santos.png", state: "SP", stadium: "Vila Belmiro" },
+  { id: 1765, name: "Fluminense", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/fluminense.png", state: "RJ", stadium: "Maracanã" },
+  { id: 1780, name: "Vasco da Gama", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/vasco.png", state: "RJ", stadium: "São Januário" },
+  { id: 1770, name: "Botafogo", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/botafogo.png", state: "RJ", stadium: "Nilton Santos" },
+  { id: 1767, name: "Grêmio", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/gremio.png", state: "RS", stadium: "Arena do Grêmio" },
+  { id: 1768, name: "Internacional", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/internacional.png", state: "RS", stadium: "Beira-Rio" },
+  { id: 1766, name: "Atlético Mineiro", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/atletico_mg.png", state: "MG", stadium: "Arena MRV" },
+  { id: 1779, name: "Cruzeiro", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/cruzeiro.png", state: "MG", stadium: "Mineirão" },
+  { id: 1777, name: "Bahia", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/bahia.png", state: "BA", stadium: "Arena Fonte Nova" },
+  { id: 1837, name: "Fortaleza", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/fortaleza.png", state: "CE", stadium: "Castelão" },
+  { id: 1772, name: "Athletico Paranaense", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/athletico_pr.png", state: "PR", stadium: "Ligga Arena" },
+  { id: 1782, name: "Red Bull Bragantino", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/bragantino.png", state: "SP", stadium: "Nabi Abi Chedid" }
 ];
 
-// Jogos estendidos (Série B, Seleção Principal, Feminino e Base Sub-20)
+// Partidas das demais categorias (Série B, Seleções, Sub-20/Sub-17 e Feminino)
 const EXTRA_MATCHES = [
   {
     id: 9001,
-    utcDate: new Date().toISOString(),
-    status: "TIMED",
-    matchday: 28,
-    categoryTag: "Masculino • Profissional",
-    competition: { name: "Brasileirão Série B" },
-    homeTeam: { name: "Santos", shortName: "Santos", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10276.png" },
-    awayTeam: { name: "Operário-PR", shortName: "Operário", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/321853.png" },
-    venue: "Vila Belmiro",
-    broadcaster: "Premiere / SporTV"
-  },
-  {
-    id: 9002,
-    utcDate: new Date(Date.now() + 86400000).toISOString(),
+    utcDate: new Date("2026-09-28T18:30:00Z").toISOString(),
     status: "TIMED",
     stage: "Amistoso Internacional",
     categoryTag: "Masculino • Seleção Principal",
     competition: { name: "Jogos de Seleções" },
-    homeTeam: { name: "Brasil", shortName: "Brasil", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8256.png" },
-    awayTeam: { name: "Espanha", shortName: "Espanha", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8257.png" },
-    venue: "Santiago Bernabéu",
+    homeTeam: { name: "Brasil", shortName: "Brasil", crest: "https://crests.football-data.org/764.svg" },
+    awayTeam: { name: "Austrália", shortName: "Austrália", crest: "https://crests.football-data.org/779.svg" },
+    venue: "Estádio Nacional",
     broadcaster: "TV Globo / SporTV"
   },
   {
+    id: 9002,
+    utcDate: new Date("2026-09-27T16:00:00Z").toISOString(),
+    status: "FINISHED",
+    stage: "Torneio Internacional Sub-17",
+    categoryTag: "Masculino • Sub-17",
+    competition: { name: "Jogos de Seleções Base" },
+    homeTeam: { name: "Brasil Sub-17", shortName: "Brasil Sub-17", crest: "https://crests.football-data.org/764.svg" },
+    awayTeam: { name: "Espanha Sub-17", shortName: "Espanha Sub-17", crest: "https://crests.football-data.org/760.svg" },
+    venue: "Centro de Treinamento",
+    broadcaster: "CBF TV / YouTube"
+  },
+  {
     id: 9003,
-    utcDate: new Date(Date.now() + 172800000).toISOString(),
+    utcDate: new Date("2026-09-28T21:00:00Z").toISOString(),
     status: "TIMED",
-    stage: "Fase de Grupos",
-    categoryTag: "Feminino • Profissional",
-    competition: { name: "Brasileirão Feminino" },
-    homeTeam: { name: "Corinthians (Fem)", shortName: "Corinthians Fem", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10272.png" },
-    awayTeam: { name: "Palmeiras (Fem)", shortName: "Palmeiras Fem", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10283.png" },
-    venue: "Parque São Jorge",
-    broadcaster: "SporTV / TV Brasil"
+    matchday: 28,
+    categoryTag: "Masculino • Profissional",
+    competition: { name: "Brasileirão Série B" },
+    homeTeam: { name: "Santos", shortName: "Santos", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/santos.png" },
+    awayTeam: { name: "Operário-PR", shortName: "Operário", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/operario_pr.png" },
+    venue: "Vila Belmiro",
+    broadcaster: "Premiere / SporTV"
   },
   {
     id: 9004,
-    utcDate: new Date(Date.now() + 259200000).toISOString(),
+    utcDate: new Date("2026-09-29T19:00:00Z").toISOString(),
     status: "TIMED",
-    stage: "Quartas de Final",
-    categoryTag: "Masculino • Sub-20",
-    competition: { name: "Copa do Brasil Sub-20" },
-    homeTeam: { name: "Flamengo Sub-20", shortName: "Flamengo Sub-20", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/5926.png" },
-    awayTeam: { name: "São Paulo Sub-20", shortName: "São Paulo Sub-20", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10277.png" },
-    venue: "Gávea",
-    broadcaster: "SporTV"
+    stage: "Fase Final",
+    categoryTag: "Feminino • Profissional",
+    competition: { name: "Brasileirão Feminino" },
+    homeTeam: { name: "Corinthians (Fem)", shortName: "Corinthians Fem", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/corinthians.png" },
+    awayTeam: { name: "Palmeiras (Fem)", shortName: "Palmeiras Fem", crest: "https://raw.githubusercontent.com/evertonfagundes/escudos-futebol/main/br/palmeiras.png" },
+    venue: "Neo Química Arena",
+    broadcaster: "SporTV / TV Brasil"
   }
 ];
 
@@ -84,17 +84,17 @@ const initialNews = [
   },
   {
     id: 2,
-    title: "Série B e Seleções: Guia completo de onde assistir às partidas da semana",
-    summary: "Confira horários e canais dos confrontos da Série B, Seleção Brasileira e Brasileirão Feminino.",
-    category: "Guia de TV",
+    title: "Brasil enfrenta a Austrália nesta segunda-feira: Onde assistir ao jogo da Seleção",
+    summary: "Confira horários, escalações e transmissão do amistoso internacional da Seleção Brasileira.",
+    category: "Seleção Brasileira",
     date: "27/09/2026",
-    url: "https://ge.globo.com/futebol/brasileirao-serie-b/"
+    url: "https://ge.globo.com/futebol/selecao-brasileira/"
   },
   {
     id: 3,
-    title: "Copa do Brasil Sub-20 e Futebol Feminino em destaque nos canais de esporte",
-    summary: "Saiba onde acompanhar os talentos das categorias de base e do futebol feminino nacional.",
-    category: "Base & Feminino",
+    title: "Série B do Brasileirão e Futebol Feminino em destaque nos canais de esporte",
+    summary: "Saiba onde acompanhar o Santos na Série B e a reta final do Brasileirão Feminino.",
+    category: "Série B & Feminino",
     date: "26/09/2026",
     url: "https://uol.com.br/esporte"
   }
@@ -235,7 +235,7 @@ export default function App() {
             <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
               type="text" 
-              placeholder="Buscar por time, categoria (ex: Sub-20, Feminino), estádio..."
+              placeholder="Buscar por time, categoria (ex: Sub-17, Sub-20, Feminino), estádio..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
@@ -270,7 +270,7 @@ export default function App() {
           </div>
         )}
 
-        {/* Lista de Partidas com Categoria (Feminino/Base/Masculino) */}
+        {/* Lista de Partidas com Categoria (Sub-17/Sub-20/Feminino/Masculino) */}
         {!loading && (
           <section className="space-y-4">
             <div className="flex items-center justify-between">
@@ -304,7 +304,7 @@ export default function App() {
                 return (
                   <div key={match.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4 hover:border-slate-700 transition">
                     
-                    {/* Header: Liga, Categoria (Feminino/Sub-20/etc), Rodada, Data */}
+                    {/* Header: Liga, Categoria, Rodada, Data */}
                     <div className="flex flex-wrap items-center justify-between text-xs text-slate-400 pb-2 border-b border-slate-800/60 gap-2">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-semibold text-emerald-400 flex items-center gap-1">
