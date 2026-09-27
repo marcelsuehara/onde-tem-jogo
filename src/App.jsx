@@ -7,31 +7,31 @@ export default function App() {
   const [selectedChannel, setSelectedChannel] = useState('todos');
   const [selectedTeam, setSelectedTeam] = useState(null);
 
-  // Escudos oficiais via Wikimedia PNG
+  // Escudos hospedados em CDN aberta e estável
   const teams = [
-    { id: 'flamengo', name: 'Flamengo', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Flamengo_brazilian_football_club_logo.svg/120px-Flamengo_brazilian_football_club_logo.svg.png' },
-    { id: 'palmeiras', name: 'Palmeiras', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Palmeiras_logo.svg/120px-Palmeiras_logo.svg.png' },
-    { id: 'corinthians', name: 'Corinthians', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Sport_Club_Corinthians_Paulista_crest.svg/120px-Sport_Club_Corinthians_Paulista_crest.svg.png' },
-    { id: 'sao-paulo', name: 'São Paulo', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Brasao_do_Sao_Paulo_Futebol_Clube.svg/120px-Brasao_do_Sao_Paulo_Futebol_Clube.svg.png' },
-    { id: 'santos', name: 'Santos', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Santos_Logo.digital.png/120px-Santos_Logo.digital.png' },
-    { id: 'gremio', name: 'Grêmio', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Gremio_logo.svg/120px-Gremio_logo.svg.png' },
-    { id: 'internacional', name: 'Internacional', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Escudo_do_Sport_Club_Internacional.svg/120px-Escudo_do_Sport_Club_Internacional.svg.png' },
-    { id: 'botafogo', name: 'Botafogo', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Botafogo_de_Futebol_e_Regatas_logo.svg/120px-Botafogo_de_Futebol_e_Regatas_logo.svg.png' },
-    { id: 'fluminense', name: 'Fluminense', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Fluminense_FC_escudo.svg/120px-Fluminense_FC_escudo.svg.png' },
-    { id: 'vasco', name: 'Vasco', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Vasco_Da_Gama_Logo.png/120px-Vasco_Da_Gama_Logo.png' },
-    { id: 'cruzeiro', name: 'Cruzeiro', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Cruzeiro_Esporte_Clube_%28logo_2021%29.svg/120px-Cruzeiro_Esporte_Clube_%28logo_2021%29.svg.png' },
-    { id: 'atletico-mg', name: 'Atlético-MG', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Clube_Atl%C3%A9tico_Mineiro_logo.svg/120px-Clube_Atl%C3%A9tico_Mineiro_logo.svg.png' },
-    { id: 'bahia', name: 'Bahia', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/ECBahia_vetor.svg/120px-ECBahia_vetor.svg.png' },
-    { id: 'sport', name: 'Sport', badge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Sport_Club_do_Recife.svg/120px-Sport_Club_do_Recife.svg.png' },
+    { id: 'flamengo', name: 'Flamengo', badge: 'https://api.sofascore.app/api/v1/team/5981/image' },
+    { id: 'palmeiras', name: 'Palmeiras', badge: 'https://api.sofascore.app/api/v1/team/1963/image' },
+    { id: 'corinthians', name: 'Corinthians', badge: 'https://api.sofascore.app/api/v1/team/1957/image' },
+    { id: 'sao-paulo', name: 'São Paulo', badge: 'https://api.sofascore.app/api/v1/team/1981/image' },
+    { id: 'santos', name: 'Santos', badge: 'https://api.sofascore.app/api/v1/team/1968/image' },
+    { id: 'gremio', name: 'Grêmio', badge: 'https://api.sofascore.app/api/v1/team/5926/image' },
+    { id: 'internacional', name: 'Internacional', badge: 'https://api.sofascore.app/api/v1/team/1966/image' },
+    { id: 'botafogo', name: 'Botafogo', badge: 'https://api.sofascore.app/api/v1/team/1958/image' },
+    { id: 'fluminense', name: 'Fluminense', badge: 'https://api.sofascore.app/api/v1/team/1961/image' },
+    { id: 'vasco', name: 'Vasco', badge: 'https://api.sofascore.app/api/v1/team/1974/image' },
+    { id: 'cruzeiro', name: 'Cruzeiro', badge: 'https://api.sofascore.app/api/v1/team/1954/image' },
+    { id: 'atletico-mg', name: 'Atlético-MG', badge: 'https://api.sofascore.app/api/v1/team/1977/image' },
+    { id: 'bahia', name: 'Bahia', badge: 'https://api.sofascore.app/api/v1/team/1955/image' },
+    { id: 'sport', name: 'Sport', badge: 'https://api.sofascore.app/api/v1/team/1959/image' },
   ];
 
   const matches = [
     {
       id: 1,
       homeTeam: 'Flamengo',
-      homeBadge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Flamengo_brazilian_football_club_logo.svg/120px-Flamengo_brazilian_football_club_logo.svg.png',
+      homeBadge: 'https://api.sofascore.app/api/v1/team/5981/image',
       awayTeam: 'Palmeiras',
-      awayBadge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Palmeiras_logo.svg/120px-Palmeiras_logo.svg.png',
+      awayBadge: 'https://api.sofascore.app/api/v1/team/1963/image',
       time: 'AO VIVO - 32 min',
       isLive: true,
       channels: ['Globo', 'Premiere'],
@@ -42,9 +42,9 @@ export default function App() {
     {
       id: 2,
       homeTeam: 'Corinthians',
-      homeBadge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Sport_Club_Corinthians_Paulista_crest.svg/120px-Sport_Club_Corinthians_Paulista_crest.svg.png',
+      homeBadge: 'https://api.sofascore.app/api/v1/team/1957/image',
       awayTeam: 'São Paulo',
-      awayBadge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Brasao_do_Sao_Paulo_Futebol_Clube.svg/120px-Brasao_do_Sao_Paulo_Futebol_Clube.svg.png',
+      awayBadge: 'https://api.sofascore.app/api/v1/team/1981/image',
       time: '18:30',
       isLive: false,
       channels: ['CazéTV', 'Premiere'],
@@ -55,9 +55,9 @@ export default function App() {
     {
       id: 3,
       homeTeam: 'Santos',
-      homeBadge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Santos_Logo.digital.png/120px-Santos_Logo.digital.png',
+      homeBadge: 'https://api.sofascore.app/api/v1/team/1968/image',
       awayTeam: 'Sport',
-      awayBadge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Sport_Club_do_Recife.svg/120px-Sport_Club_do_Recife.svg.png',
+      awayBadge: 'https://api.sofascore.app/api/v1/team/1959/image',
       time: '21:30',
       isLive: false,
       channels: ['Sportv', 'Premiere'],
@@ -160,6 +160,7 @@ export default function App() {
                     alt={team.name} 
                     className="w-10 h-10 object-contain mb-1"
                     loading="lazy"
+                    crossOrigin="anonymous"
                   />
                   <span className="text-[11px] font-medium text-slate-300 truncate max-w-[64px]">{team.name}</span>
                 </button>
@@ -172,7 +173,7 @@ export default function App() {
         {selectedTeam && (
           <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-2xl flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src={selectedTeam.badge} alt={selectedTeam.name} className="w-8 h-8 object-contain" />
+              <img src={selectedTeam.badge} alt={selectedTeam.name} className="w-8 h-8 object-contain" crossOrigin="anonymous" />
               <div>
                 <h3 className="text-sm font-bold text-white">Exibindo conteúdos de: {selectedTeam.name}</h3>
                 <p className="text-xs text-slate-400">Próximos jogos, transmissões e últimas notícias</p>
@@ -251,7 +252,7 @@ export default function App() {
 
                 <div className="grid grid-cols-3 items-center text-center">
                   <div className="flex flex-col items-center space-y-2">
-                    <img src={match.homeBadge} alt={match.homeTeam} className="w-12 h-12 object-contain" />
+                    <img src={match.homeBadge} alt={match.homeTeam} className="w-12 h-12 object-contain" crossOrigin="anonymous" />
                     <span className="font-bold text-sm text-slate-100">{match.homeTeam}</span>
                   </div>
 
@@ -264,7 +265,7 @@ export default function App() {
                   </div>
 
                   <div className="flex flex-col items-center space-y-2">
-                    <img src={match.awayBadge} alt={match.awayTeam} className="w-12 h-12 object-contain" />
+                    <img src={match.awayBadge} alt={match.awayTeam} className="w-12 h-12 object-contain" crossOrigin="anonymous" />
                     <span className="font-bold text-sm text-slate-100">{match.awayTeam}</span>
                   </div>
                 </div>
