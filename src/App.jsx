@@ -1,36 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { Tv, Calendar, Search, Trophy, RefreshCw, AlertCircle, Newspaper, ExternalLink, MapPin, Shield } from 'lucide-react';
+import { Tv, Calendar, Search, Trophy, RefreshCw, AlertCircle, Newspaper, ExternalLink, MapPin, Shield, UserCheck } from 'lucide-react';
 
-// IDs OFICIAIS e ÚNICAS da Football-Data.org para o futebol brasileiro
+// Escudos Oficiais com URLs de CDN de alta disponibilidade (sem bloqueios CORS/Wikimedia)
 const BRASIL_TEAMS = [
-  { id: 1783, name: "Flamengo", crest: "https://crests.football-data.org/1783.png", state: "RJ", stadium: "Maracanã" },
-  { id: 1769, name: "Palmeiras", crest: "https://crests.football-data.org/1769.png", state: "SP", stadium: "Allianz Parque" },
-  { id: 1776, name: "São Paulo", crest: "https://crests.football-data.org/1776.png", state: "SP", stadium: "MorrumBIS" },
-  { id: 1771, name: "Corinthians", crest: "https://crests.football-data.org/1771.png", state: "SP", stadium: "Neo Química Arena" },
-  { id: 1778, name: "Santos", crest: "https://crests.football-data.org/1778.png", state: "SP", stadium: "Vila Belmiro" },
-  { id: 1765, name: "Fluminense", crest: "https://crests.football-data.org/1765.png", state: "RJ", stadium: "Maracanã" },
-  { id: 1780, name: "Vasco da Gama", crest: "https://crests.football-data.org/1780.png", state: "RJ", stadium: "São Januário" },
-  { id: 1770, name: "Botafogo", crest: "https://crests.football-data.org/1770.png", state: "RJ", stadium: "Nilton Santos" },
-  { id: 1767, name: "Grêmio", crest: "https://crests.football-data.org/1767.png", state: "RS", stadium: "Arena do Grêmio" },
-  { id: 1768, name: "Internacional", crest: "https://crests.football-data.org/1768.png", state: "RS", stadium: "Beira-Rio" },
-  { id: 1766, name: "Atlético Mineiro", crest: "https://crests.football-data.org/1766.png", state: "MG", stadium: "Arena MRV" },
-  { id: 1779, name: "Cruzeiro", crest: "https://crests.football-data.org/1779.png", state: "MG", stadium: "Mineirão" },
-  { id: 1777, name: "Bahia", crest: "https://crests.football-data.org/1777.png", state: "BA", stadium: "Arena Fonte Nova" },
-  { id: 1837, name: "Fortaleza", crest: "https://crests.football-data.org/1837.png", state: "CE", stadium: "Castelão" },
-  { id: 1772, name: "Athletico Paranaense", crest: "https://crests.football-data.org/1772.png", state: "PR", stadium: "Ligga Arena" },
-  { id: 1782, name: "Red Bull Bragantino", crest: "https://crests.football-data.org/1782.png", state: "SP", stadium: "Nabi Abi Chedid" }
+  { id: 1, name: "Flamengo", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/5926.png", state: "RJ", stadium: "Maracanã" },
+  { id: 2, name: "Palmeiras", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10283.png", state: "SP", stadium: "Allianz Parque" },
+  { id: 3, name: "São Paulo", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10277.png", state: "SP", stadium: "MorrumBIS" },
+  { id: 4, name: "Corinthians", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10272.png", state: "SP", stadium: "Neo Química Arena" },
+  { id: 5, name: "Santos", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10276.png", state: "SP", stadium: "Vila Belmiro" },
+  { id: 6, name: "Fluminense", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10274.png", state: "RJ", stadium: "Maracanã" },
+  { id: 7, name: "Vasco da Gama", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10278.png", state: "RJ", stadium: "São Januário" },
+  { id: 8, name: "Botafogo", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8517.png", state: "RJ", stadium: "Nilton Santos" },
+  { id: 9, name: "Grêmio", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10275.png", state: "RS", stadium: "Arena do Grêmio" },
+  { id: 10, name: "Internacional", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8632.png", state: "RS", stadium: "Beira-Rio" },
+  { id: 11, name: "Atlético Mineiro", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10273.png", state: "MG", stadium: "Arena MRV" },
+  { id: 12, name: "Cruzeiro", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9782.png", state: "MG", stadium: "Mineirão" },
+  { id: 13, name: "Bahia", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10281.png", state: "BA", stadium: "Arena Fonte Nova" },
+  { id: 14, name: "Fortaleza", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8287.png", state: "CE", stadium: "Castelão" },
+  { id: 15, name: "Athletico Paranaense", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10280.png", state: "PR", stadium: "Ligga Arena" },
+  { id: 16, name: "Red Bull Bragantino", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10282.png", state: "SP", stadium: "Nabi Abi Chedid" }
 ];
 
-// Jogos adicionais padronizados com os escudos oficiais da API + canais de transmissão
+// Jogos estendidos (Série B, Seleção Principal, Feminino e Base Sub-20)
 const EXTRA_MATCHES = [
   {
     id: 9001,
     utcDate: new Date().toISOString(),
     status: "TIMED",
     matchday: 28,
+    categoryTag: "Masculino • Profissional",
     competition: { name: "Brasileirão Série B" },
-    homeTeam: { name: "Santos", shortName: "Santos", crest: "https://crests.football-data.org/1778.png" },
-    awayTeam: { name: "Operário-PR", shortName: "Operário", crest: "https://crests.football-data.org/764.png" },
+    homeTeam: { name: "Santos", shortName: "Santos", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10276.png" },
+    awayTeam: { name: "Operário-PR", shortName: "Operário", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/321853.png" },
     venue: "Vila Belmiro",
     broadcaster: "Premiere / SporTV"
   },
@@ -39,11 +40,36 @@ const EXTRA_MATCHES = [
     utcDate: new Date(Date.now() + 86400000).toISOString(),
     status: "TIMED",
     stage: "Amistoso Internacional",
+    categoryTag: "Masculino • Seleção Principal",
     competition: { name: "Jogos de Seleções" },
-    homeTeam: { name: "Brasil", shortName: "Brasil", crest: "https://crests.football-data.org/764.png" },
-    awayTeam: { name: "Espanha", shortName: "Espanha", crest: "https://crests.football-data.org/760.png" },
+    homeTeam: { name: "Brasil", shortName: "Brasil", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8256.png" },
+    awayTeam: { name: "Espanha", shortName: "Espanha", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8257.png" },
     venue: "Santiago Bernabéu",
     broadcaster: "TV Globo / SporTV"
+  },
+  {
+    id: 9003,
+    utcDate: new Date(Date.now() + 172800000).toISOString(),
+    status: "TIMED",
+    stage: "Fase de Grupos",
+    categoryTag: "Feminino • Profissional",
+    competition: { name: "Brasileirão Feminino" },
+    homeTeam: { name: "Corinthians (Fem)", shortName: "Corinthians Fem", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10272.png" },
+    awayTeam: { name: "Palmeiras (Fem)", shortName: "Palmeiras Fem", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10283.png" },
+    venue: "Parque São Jorge",
+    broadcaster: "SporTV / TV Brasil"
+  },
+  {
+    id: 9004,
+    utcDate: new Date(Date.now() + 259200000).toISOString(),
+    status: "TIMED",
+    stage: "Quartas de Final",
+    categoryTag: "Masculino • Sub-20",
+    competition: { name: "Copa do Brasil Sub-20" },
+    homeTeam: { name: "Flamengo Sub-20", shortName: "Flamengo Sub-20", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/5926.png" },
+    awayTeam: { name: "São Paulo Sub-20", shortName: "São Paulo Sub-20", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10277.png" },
+    venue: "Gávea",
+    broadcaster: "SporTV"
   }
 ];
 
@@ -51,24 +77,24 @@ const initialNews = [
   {
     id: 1,
     title: "São Paulo x Santos: Onde assistir ao vivo, horário e prováveis escalações",
-    summary: "Clássico San-São movimenta o futebol paulista. Confira detalhes da transmissão e momento das equipes.",
+    summary: "Clássico San-São movimenta o futebol paulista no MorrumBIS. Confira detalhes da transmissão.",
     category: "Brasileirão",
     date: "27/09/2026",
     url: "https://ge.globo.com"
   },
   {
     id: 2,
-    title: "Série B do Brasileirão: Confira onde assistir aos jogos da rodada",
-    summary: "Disputa pelo acesso esquenta com confrontos decisivos neste fim de semana.",
-    category: "Série B",
+    title: "Série B e Seleções: Guia completo de onde assistir às partidas da semana",
+    summary: "Confira horários e canais dos confrontos da Série B, Seleção Brasileira e Brasileirão Feminino.",
+    category: "Guia de TV",
     date: "27/09/2026",
     url: "https://ge.globo.com/futebol/brasileirao-serie-b/"
   },
   {
     id: 3,
-    title: "Guia de Transmissões da Semana: Onde assistir aos jogos europeus e seleção",
-    summary: "Saiba quais canais de TV e serviços de streaming vão transmitir as partidas.",
-    category: "Guia de TV",
+    title: "Copa do Brasil Sub-20 e Futebol Feminino em destaque nos canais de esporte",
+    summary: "Saiba onde acompanhar os talentos das categorias de base e do futebol feminino nacional.",
+    category: "Base & Feminino",
     date: "26/09/2026",
     url: "https://uol.com.br/esporte"
   }
@@ -90,7 +116,10 @@ export default function App() {
       let apiMatches = [];
       if (res.ok) {
         const data = await res.json();
-        apiMatches = data.matches || [];
+        apiMatches = (data.matches || []).map(m => ({
+          ...m,
+          categoryTag: "Masculino • Profissional"
+        }));
       }
       setMatches([...apiMatches, ...EXTRA_MATCHES]);
     } catch (err) {
@@ -111,11 +140,13 @@ export default function App() {
     const homeName = match.homeTeam?.name || '';
     const awayName = match.awayTeam?.name || '';
     const leagueName = match.competition?.name || '';
+    const categoryTag = match.categoryTag || '';
 
     const matchesSearch = 
       homeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       awayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      leagueName.toLowerCase().includes(searchQuery.toLowerCase());
+      leagueName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      categoryTag.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesLeague = selectedLeague === 'todas' || leagueName === selectedLeague;
     const matchesTeamFilter = !selectedTeamFilter || homeName.toLowerCase().includes(selectedTeamFilter.toLowerCase()) || awayName.toLowerCase().includes(selectedTeamFilter.toLowerCase());
@@ -136,7 +167,7 @@ export default function App() {
               <h1 className="text-xl font-black tracking-tight text-white flex items-center gap-1.5">
                 Onde tem Jogo? <span className="text-xs font-bold bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">AO VIVO</span>
               </h1>
-              <p className="text-xs text-slate-400">Guia de Partidas, Séries A & B, Seleções e Transmissões</p>
+              <p className="text-xs text-slate-400">Guia de Partidas, Séries A & B, Seleções, Base e Feminino</p>
             </div>
           </div>
           <button 
@@ -204,7 +235,7 @@ export default function App() {
             <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
               type="text" 
-              placeholder="Buscar por time, estádio ou campeonato..."
+              placeholder="Buscar por time, categoria (ex: Sub-20, Feminino), estádio..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
@@ -235,11 +266,11 @@ export default function App() {
         {loading && (
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-3">
             <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin mx-auto" />
-            <p className="text-sm text-slate-400">Buscando as próximas partidas na API...</p>
+            <p className="text-sm text-slate-400">Buscando as próximas partidas em tempo real...</p>
           </div>
         )}
 
-        {/* Lista de Partidas com Estádio, Rodada e Onde Assistir */}
+        {/* Lista de Partidas com Categoria (Feminino/Base/Masculino) */}
         {!loading && (
           <section className="space-y-4">
             <div className="flex items-center justify-between">
@@ -268,14 +299,19 @@ export default function App() {
                 const foundTeam = BRASIL_TEAMS.find(t => homeTeamName.toLowerCase().includes(t.name.toLowerCase()));
                 const venueName = match.venue || foundTeam?.stadium || 'Estádio a definir';
                 const tvChannel = match.broadcaster || 'Premiere / TV Fechada';
+                const categoryTag = match.categoryTag || 'Masculino • Profissional';
 
                 return (
                   <div key={match.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4 hover:border-slate-700 transition">
                     
+                    {/* Header: Liga, Categoria (Feminino/Sub-20/etc), Rodada, Data */}
                     <div className="flex flex-wrap items-center justify-between text-xs text-slate-400 pb-2 border-b border-slate-800/60 gap-2">
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className="font-semibold text-emerald-400 flex items-center gap-1">
                           <Trophy className="w-3.5 h-3.5" /> {match.competition?.name}
+                        </span>
+                        <span className="bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 px-2 py-0.5 rounded text-[10px] font-semibold flex items-center gap-1">
+                          <UserCheck className="w-3 h-3" /> {categoryTag}
                         </span>
                         <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[11px] font-medium">
                           {roundText}
@@ -284,6 +320,7 @@ export default function App() {
                       <span className="font-medium text-slate-300">{dateString} - {timeString}</span>
                     </div>
 
+                    {/* Confronto */}
                     <div className="grid grid-cols-3 items-center text-center">
                       <div className="flex flex-col items-center space-y-2">
                         <div className="w-12 h-12 flex items-center justify-center">
@@ -312,7 +349,7 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* Rodapé do Card: Localização e Canal de Transmissão */}
+                    {/* Rodapé: Local e Canal */}
                     <div className="pt-2 border-t border-slate-800/40 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
                       <div className="flex items-center gap-1.5">
                         <MapPin className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
