@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Tv, Calendar, Search, Trophy, RefreshCw, AlertCircle, Newspaper, ExternalLink, MapPin, Shield } from 'lucide-react';
 
-// Mapeamento 100% verificado com os escudos corretos do Wikimedia Commons
+// Lista com os escudos oficiais da CDN oficial (Football-Data) sem bloqueio de imagem
 const BRASIL_TEAMS = [
-  { id: 1, name: "Flamengo", crest: "https://upload.wikimedia.org/wikipedia/commons/2/2e/Flamengo_braz_logo.svg", state: "RJ", stadium: "Maracanã" },
-  { id: 2, name: "Palmeiras", crest: "https://upload.wikimedia.org/wikipedia/commons/1/10/Palmeiras_logo.svg", state: "SP", stadium: "Allianz Parque" },
-  { id: 3, name: "São Paulo", crest: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Brasao_do_Sao_Paulo_Futebol_Clube.svg", state: "SP", stadium: "MorrumBIS" },
-  { id: 4, name: "Corinthians", crest: "https://upload.wikimedia.org/wikipedia/pt/b/b4/Corinthians_simbolo.svg", state: "SP", stadium: "Neo Química Arena" },
-  { id: 5, name: "Santos", crest: "https://upload.wikimedia.org/wikipedia/commons/3/35/Santos_logo.svg", state: "SP", stadium: "Vila Belmiro" },
-  { id: 6, name: "Fluminense", crest: "https://upload.wikimedia.org/wikipedia/pt/a/a3/FFC_crest.svg", state: "RJ", stadium: "Maracanã" },
-  { id: 7, name: "Vasco da Gama", crest: "https://upload.wikimedia.org/wikipedia/pt/a/ac/CRVascodaGama.svg", state: "RJ", stadium: "São Januário" },
-  { id: 8, name: "Botafogo", crest: "https://upload.wikimedia.org/wikipedia/commons/5/52/Botafogo_de_Futebol_e_Regatas_logo.svg", state: "RJ", stadium: "Nilton Santos" },
-  { id: 9, name: "Grêmio", crest: "https://upload.wikimedia.org/wikipedia/commons/a/a2/Gremio_logo.svg", state: "RS", stadium: "Arena do Grêmio" },
-  { id: 10, name: "Internacional", crest: "https://upload.wikimedia.org/wikipedia/commons/f/f1/Escudo_do_Sport_Club_Internacional.svg", state: "RS", stadium: "Beira-Rio" },
-  { id: 11, name: "Atlético Mineiro", crest: "https://upload.wikimedia.org/wikipedia/commons/5/5f/Atletico_mineiro_galo.svg", state: "MG", stadium: "Arena MRV" },
-  { id: 12, name: "Cruzeiro", crest: "https://upload.wikimedia.org/wikipedia/commons/9/90/Cruzeiro_Esporte_Clube_%28logo_2021%29.svg", state: "MG", stadium: "Mineirão" },
-  { id: 13, name: "Bahia", crest: "https://upload.wikimedia.org/wikipedia/pt/2/2c/Esporte_Clube_Bahia_logo.svg", state: "BA", stadium: "Arena Fonte Nova" },
-  { id: 14, name: "Fortaleza", crest: "https://upload.wikimedia.org/wikipedia/commons/7/79/Fortaleza_Esporte_Clube_logo.png", state: "CE", stadium: "Castelão" },
-  { id: 15, name: "Athletico Paranaense", crest: "https://upload.wikimedia.org/wikipedia/commons/b/b3/Athletico_Paranaense_2019.svg", state: "PR", stadium: "Ligga Arena" },
-  { id: 16, name: "Red Bull Bragantino", crest: "https://upload.wikimedia.org/wikipedia/pt/9/9e/RedBullBragantino.svg", state: "SP", stadium: "Nabi Abi Chedid" }
+  { id: 1783, name: "Flamengo", crest: "https://crests.football-data.org/1783.png", state: "RJ", stadium: "Maracanã" },
+  { id: 1769, name: "Palmeiras", crest: "https://crests.football-data.org/1769.png", state: "SP", stadium: "Allianz Parque" },
+  { id: 1776, name: "São Paulo", crest: "https://crests.football-data.org/1776.png", state: "SP", stadium: "MorrumBIS" },
+  { id: 1771, name: "Corinthians", crest: "https://crests.football-data.org/1771.png", state: "SP", stadium: "Neo Química Arena" },
+  { id: 1778, name: "Santos", crest: "https://crests.football-data.org/1778.png", state: "SP", stadium: "Vila Belmiro" },
+  { id: 1765, name: "Fluminense", crest: "https://crests.football-data.org/1765.png", state: "RJ", stadium: "Maracanã" },
+  { id: 1780, name: "Vasco da Gama", crest: "https://crests.football-data.org/1780.png", state: "RJ", stadium: "São Januário" },
+  { id: 1770, name: "Botafogo", crest: "https://crests.football-data.org/1770.png", state: "RJ", stadium: "Nilton Santos" },
+  { id: 1767, name: "Grêmio", crest: "https://crests.football-data.org/1767.png", state: "RS", stadium: "Arena do Grêmio" },
+  { id: 1768, name: "Internacional", crest: "https://crests.football-data.org/1768.png", state: "RS", stadium: "Beira-Rio" },
+  { id: 1766, name: "Atlético Mineiro", crest: "https://crests.football-data.org/1766.png", state: "MG", stadium: "Arena MRV" },
+  { id: 1779, name: "Cruzeiro", crest: "https://crests.football-data.org/1779.png", state: "MG", stadium: "Mineirão" },
+  { id: 1777, name: "Bahia", crest: "https://crests.football-data.org/1777.png", state: "BA", stadium: "Arena Fonte Nova" },
+  { id: 1837, name: "Fortaleza", crest: "https://crests.football-data.org/1837.png", state: "CE", stadium: "Castelão" },
+  { id: 1772, name: "Athletico Paranaense", crest: "https://crests.football-data.org/1772.png", state: "PR", stadium: "Ligga Arena" },
+  { id: 1782, name: "Red Bull Bragantino", crest: "https://crests.football-data.org/1782.png", state: "SP", stadium: "Nabi Abi Chedid" }
 ];
 
 const initialNews = [
@@ -160,7 +160,15 @@ export default function App() {
                 }`}
               >
                 <div className="w-9 h-9 flex items-center justify-center mb-1">
-                  <img src={team.crest} alt={team.name} className="max-w-full max-h-full object-contain filter drop-shadow-sm" />
+                  <img 
+                    src={team.crest} 
+                    alt={team.name} 
+                    className="max-w-full max-h-full object-contain filter drop-shadow-sm"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://crests.football-data.org/764.png";
+                    }}
+                  />
                 </div>
                 <span className="text-[10px] font-semibold text-slate-200 truncate max-w-[75px]">{team.name}</span>
                 <span className="text-[9px] text-slate-400">{team.state}</span>
