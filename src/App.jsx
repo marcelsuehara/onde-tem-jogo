@@ -1,12 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { Tv, Calendar, Search, Trophy, RefreshCw, AlertCircle, Newspaper, ExternalLink, ChevronRight } from 'lucide-react';
+import { Tv, Calendar, Search, Trophy, RefreshCw, AlertCircle, Newspaper, ExternalLink, MapPin, Shield } from 'lucide-react';
 
-// Notícias e Resumos Fictícios / Editáveis para AdSense
+// Lista completa fixa dos principais times das Séries A e B para navegação rápida
+const BRASIL_TEAMS = [
+  { id: 1, name: "Flamengo", crest: "https://crests.football-data.org/1783.png", state: "RJ", stadium: "Maracanã" },
+  { id: 2, name: "Palmeiras", crest: "https://crests.football-data.org/1769.png", state: "SP", stadium: "Allianz Parque" },
+  { id: 3, name: "São Paulo", crest: "https://crests.football-data.org/1776.png", state: "SP", stadium: "MorrumBIS" },
+  { id: 4, name: "Corinthians", crest: "https://crests.football-data.org/1771.png", state: "SP", stadium: "Neo Química Arena" },
+  { id: 5, name: "Santos", crest: "https://crests.football-data.org/1778.png", state: "SP", stadium: "Vila Belmiro" },
+  { id: 6, name: "Fluminense", crest: "https://crests.football-data.org/1765.png", state: "RJ", stadium: "Maracanã" },
+  { id: 7, name: "Vasco da Gama", crest: "https://crests.football-data.org/1780.png", state: "RJ", stadium: "São Januário" },
+  { id: 8, name: "Botafogo", crest: "https://crests.football-data.org/1770.png", state: "RJ", stadium: "Nilton Santos" },
+  { id: 9, name: "Grêmio", crest: "https://crests.football-data.org/1767.png", state: "RS", stadium: "Arena do Grêmio" },
+  { id: 10, name: "Internacional", crest: "https://crests.football-data.org/1768.png", state: "RS", stadium: "Beira-Rio" },
+  { id: 11, name: "Atlético Mineiro", crest: "https://crests.football-data.org/1766.png", state: "MG", stadium: "Arena MRV" },
+  { id: 12, name: "Cruzeiro", crest: "https://crests.football-data.org/1779.png", state: "MG", stadium: "Mineirão" },
+  { id: 13, name: "Bahia", crest: "https://crests.football-data.org/1777.png", state: "BA", stadium: "Arena Fonte Nova" },
+  { id: 14, name: "Fortaleza", crest: "https://crests.football-data.org/1837.png", state: "CE", stadium: "Castelão" },
+  { id: 15, name: "Athletico Paranaense", crest: "https://crests.football-data.org/1772.png", state: "PR", stadium: "Ligga Arena" },
+  { id: 16, name: "Red Bull Bragantino", crest: "https://crests.football-data.org/1782.png", state: "SP", stadium: "Nabi Abi Chedid" }
+];
+
 const initialNews = [
   {
     id: 1,
     title: "São Paulo x Santos: Onde assistir ao vivo, horário e prováveis escalações",
-    summary: "Clássico San-São movimenta o Brasileirão neste fim de semana. Confira todos os detalhes da transmissão e o momento das equipes.",
+    summary: "Clássico San-São movimenta o Brasileirão no MorrumBIS. Confira detalhes da transmissão e momento das equipes.",
     category: "Brasileirão",
     date: "27/09/2026",
     url: "https://ge.globo.com"
@@ -57,18 +76,8 @@ export default function App() {
     fetchMatches();
   }, []);
 
-  // Extrai times únicos para o carrossel do topo
-  const teamsMap = new Map();
-  matches.forEach(m => {
-    if (m.homeTeam?.id && m.homeTeam?.crest) teamsMap.set(m.homeTeam.name, { name: m.homeTeam.name, crest: m.homeTeam.crest });
-    if (m.awayTeam?.id && m.awayTeam?.crest) teamsMap.set(m.awayTeam.name, { name: m.awayTeam.name, crest: m.awayTeam.crest });
-  });
-  const uniqueTeams = Array.from(teamsMap.values());
-
-  // Extrai lista única de ligas
   const leagues = ['todas', ...Array.from(new Set(matches.map(m => m.competition?.name).filter(Boolean)))];
 
-  // Filtra jogos
   const filteredMatches = matches.filter(match => {
     const homeName = match.homeTeam?.name || '';
     const awayName = match.awayTeam?.name || '';
@@ -80,7 +89,7 @@ export default function App() {
       leagueName.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesLeague = selectedLeague === 'todas' || leagueName === selectedLeague;
-    const matchesTeamFilter = !selectedTeamFilter || homeName === selectedTeamFilter || awayName === selectedTeamFilter;
+    const matchesTeamFilter = !selectedTeamFilter || homeName.includes(selectedTeamFilter) || awayName.includes(selectedTeamFilter);
 
     return matchesSearch && matchesLeague && matchesTeamFilter;
   });
@@ -98,7 +107,7 @@ export default function App() {
               <h1 className="text-xl font-black tracking-tight text-white flex items-center gap-1.5">
                 Onde tem Jogo? <span className="text-xs font-bold bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">AO VIVO</span>
               </h1>
-              <p className="text-xs text-slate-400">Guia Global de Partidas e Transmissões</p>
+              <p className="text-xs text-slate-400">Guia Global de Partidas, Estádios e Transmissões</p>
             </div>
           </div>
           <button 
@@ -113,46 +122,54 @@ export default function App() {
 
       <main className="max-w-4xl mx-auto px-4 pt-6 space-y-8">
         
-        {/* Carrossel dos Escudos dos Times */}
-        {uniqueTeams.length > 0 && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <span>Filtrar por Time:</span>
-              {selectedTeamFilter && (
-                <button 
-                  onClick={() => setSelectedTeamFilter(null)}
-                  className="text-emerald-400 hover:underline font-semibold"
-                >
-                  Limpar filtro ({selectedTeamFilter})
-                </button>
-              )}
-            </div>
-            <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thin">
-              {uniqueTeams.map(team => (
-                <button
-                  key={team.name}
-                  onClick={() => setSelectedTeamFilter(selectedTeamFilter === team.name ? null : team.name)}
-                  className={`p-2 rounded-xl border flex flex-col items-center justify-center min-w-[70px] transition ${
-                    selectedTeamFilter === team.name 
-                      ? 'bg-emerald-500/20 border-emerald-500 scale-105' 
-                      : 'bg-slate-900 border-slate-800 hover:border-slate-700'
-                  }`}
-                >
-                  <img src={team.crest} alt={team.name} className="w-8 h-8 object-contain mb-1" />
-                  <span className="text-[10px] text-slate-300 truncate max-w-[60px]">{team.name}</span>
-                </button>
-              ))}
-            </div>
+        {/* Seção dos Escudos dos Times (Série A / Série B) */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between text-xs text-slate-400">
+            <span className="font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+              <Shield className="w-4 h-4 text-emerald-400" /> Times em Destaque (Clique para filtrar)
+            </span>
+            {selectedTeamFilter && (
+              <button 
+                onClick={() => setSelectedTeamFilter(null)}
+                className="text-emerald-400 hover:underline font-semibold"
+              >
+                Limpar filtro ({selectedTeamFilter})
+              </button>
+            )}
           </div>
-        )}
+          <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thin">
+            {BRASIL_TEAMS.map(team => (
+              <button
+                key={team.id}
+                onClick={() => {
+                  if (selectedTeamFilter === team.name) {
+                    setSelectedTeamFilter(null);
+                  } else {
+                    setSelectedTeamFilter(team.name);
+                    setSearchQuery(team.name);
+                  }
+                }}
+                className={`p-2.5 rounded-xl border flex flex-col items-center justify-center min-w-[80px] transition ${
+                  selectedTeamFilter === team.name 
+                    ? 'bg-emerald-500/20 border-emerald-500 scale-105' 
+                    : 'bg-slate-900 border-slate-800 hover:border-slate-700'
+                }`}
+              >
+                <img src={team.crest} alt={team.name} className="w-9 h-9 object-contain mb-1 filter drop-shadow-sm" />
+                <span className="text-[10px] font-semibold text-slate-200 truncate max-w-[70px]">{team.name}</span>
+                <span className="text-[9px] text-slate-400">{team.state}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
-        {/* Campo de Busca e Filtros de Ligas */}
+        {/* Busca e Filtros */}
         <div className="space-y-3">
           <div className="relative">
             <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
               type="text" 
-              placeholder="Buscar por time ou campeonato..."
+              placeholder="Buscar por time, estádio ou campeonato..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
@@ -179,7 +196,7 @@ export default function App() {
           )}
         </div>
 
-        {/* Status de Carregamento e Erro */}
+        {/* Status */}
         {loading && (
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-3">
             <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin mx-auto" />
@@ -194,7 +211,7 @@ export default function App() {
           </div>
         )}
 
-        {/* Lista de Partidas */}
+        {/* Lista de Partidas com Estádio e Rodada */}
         {!loading && !error && (
           <section className="space-y-4">
             <div className="flex items-center justify-between">
@@ -213,15 +230,35 @@ export default function App() {
                 const timeString = matchDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 const dateString = matchDate.toLocaleDateString([], { day: '2-digit', month: '2-digit' });
 
+                // Formatação de Rodada/Fase
+                const roundText = match.matchday 
+                  ? `${match.matchday}ª Rodada` 
+                  : match.stage 
+                    ? match.stage.replace('_', ' ') 
+                    : 'Fase Regular';
+
+                // Tenta mapear o estádio a partir do time mandante ou da API
+                const homeTeamName = match.homeTeam?.name || '';
+                const foundTeam = BRASIL_TEAMS.find(t => homeTeamName.includes(t.name));
+                const venueName = match.venue || foundTeam?.stadium || 'Estádio a definir';
+
                 return (
                   <div key={match.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4 hover:border-slate-700 transition">
-                    <div className="flex items-center justify-between text-xs text-slate-400 pb-2 border-b border-slate-800/60">
-                      <span className="font-semibold text-emerald-400 flex items-center gap-1">
-                        <Trophy className="w-3.5 h-3.5" /> {match.competition?.name}
-                      </span>
-                      <span>{dateString} - {timeString}</span>
+                    
+                    {/* Header do Card: Liga, Rodada, Data/Hora */}
+                    <div className="flex flex-wrap items-center justify-between text-xs text-slate-400 pb-2 border-b border-slate-800/60 gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-emerald-400 flex items-center gap-1">
+                          <Trophy className="w-3.5 h-3.5" /> {match.competition?.name}
+                        </span>
+                        <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[11px] font-medium">
+                          {roundText}
+                        </span>
+                      </div>
+                      <span className="font-medium text-slate-300">{dateString} - {timeString}</span>
                     </div>
 
+                    {/* Placar e Times */}
                     <div className="grid grid-cols-3 items-center text-center">
                       <div className="flex flex-col items-center space-y-2">
                         <div className="w-12 h-12 flex items-center justify-center">
@@ -249,6 +286,13 @@ export default function App() {
                         <span className="font-bold text-sm text-slate-100">{match.awayTeam?.shortName || match.awayTeam?.name}</span>
                       </div>
                     </div>
+
+                    {/* Rodapé do Card: Local do Jogo / Estádio */}
+                    <div className="pt-2 border-t border-slate-800/40 flex items-center justify-center text-xs text-slate-400 gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                      <span>Local: <strong className="text-slate-200">{venueName}</strong></span>
+                    </div>
+
                   </div>
                 );
               })
@@ -256,7 +300,7 @@ export default function App() {
           </section>
         )}
 
-        {/* Seção de Notícias e Matérias para AdSense */}
+        {/* Seção de Notícias */}
         <section className="space-y-4 pt-6 border-t border-slate-800">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
