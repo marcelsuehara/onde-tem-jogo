@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Tv, Calendar, Search, Trophy, RefreshCw, AlertCircle, Newspaper, ExternalLink, MapPin, Shield, UserCheck, ListOrdered, Info } from 'lucide-react';
+import { 
+  Tv, Calendar, Search, Trophy, RefreshCw, AlertCircle, Newspaper, 
+  ExternalLink, MapPin, Shield, UserCheck, ListOrdered, Info, 
+  X, PlayCircle, Flame, Filter, ChevronRight
+} from 'lucide-react';
 
 // Escudos Padronizados
 const BRASIL_TEAMS = [
@@ -17,7 +21,7 @@ const BRASIL_TEAMS = [
   { id: 12, name: "Cruzeiro", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9782.png", state: "MG", stadium: "Mineirão" }
 ];
 
-// Tabelas de Classificação Completas com Status de Zonas
+// Tabelas de Classificação Completas com Status de Zonas e Barras Coloridas
 const STANDINGS_DATA = {
   "Brasileirão Série A": [
     { pos: 1, name: "Botafogo", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8517.png", pts: 56, pj: 27, v: 17, e: 5, d: 5, sg: 22, status: "libertadores" },
@@ -61,7 +65,27 @@ const STANDINGS_DATA = {
   ]
 };
 
-// Partidas incluindo Futebol Feminino, Série B e Seleções
+// Dados de Artilharia das Ligas
+const TOP_SCORERS = [
+  { rank: 1, name: "Pedro", team: "Flamengo", goals: 11, games: 21, crest: "https://images.fotmob.com/image_resources/logo/teamlogo/5926.png", league: "Brasileirão" },
+  { rank: 2, name: "Estêvão", team: "Palmeiras", goals: 9, games: 22, crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10283.png", league: "Brasileirão" },
+  { rank: 3, name: "Luiz Henrique", team: "Botafogo", goals: 8, games: 24, crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8517.png", league: "Brasileirão" },
+  { rank: 4, name: "Erling Haaland", team: "Manchester City", goals: 10, games: 5, crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8456.png", league: "Premier League" },
+  { rank: 5, name: "Robert Lewandowski", team: "Barcelona", goals: 7, games: 7, crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8634.png", league: "La Liga" }
+];
+
+// Guia do Onde Assistir (Streaming & Canais de TV)
+const STREAMING_GUIDE = [
+  { name: "Premiere", type: "Pay-Per-View", details: "Todos os jogos do Brasileirão Séries A e B ao vivo.", badge: "Nacional" },
+  { name: "CazéTV (YouTube / Prime)", type: "Gratuito / Streaming", details: "Transmite partidas do Brasileirão, Liga Europeia e torneios femininos.", badge: "Ao Vivo" },
+  { name: "SporTV", type: "TV Fechada", details: "Transmite principais jogos da Série A, Série B, Copa do Brasil e Feminino.", badge: "Canais Globo" },
+  { name: "TV Globo", type: "TV Aberta", details: "Partidas selecionadas das quartas e domingos às 16h.", badge: "Gratuito" },
+  { name: "Disney+ / ESPN", type: "Streaming & TV Fechada", details: "Premier League, La Liga, Serie A Italiana e Copa Libertadores.", badge: "Internacional" },
+  { name: "Max (HBO Max)", type: "Streaming", details: "Transmissão exclusiva da UEFA Champions League e Paulistão.", badge: "Champions" }
+];
+
+// Partidas Extras (Amanhã, Hoje, Próximos Dias)
+const TODAY_DATE = new Date().toISOString().split('T')[0];
 const EXTRA_MATCHES = [
   {
     id: 9001,
@@ -101,22 +125,53 @@ const EXTRA_MATCHES = [
   }
 ];
 
-// Banco de Notícias Organizado por Clube
+// Banco de Notícias Automatizadas por Clube com Conteúdo Interno Completo
 const NEWS_BY_TEAM = {
   "Destaques": [
-    { id: 101, team: "Geral", title: "Guia completo de transmissões: Onde assistir aos jogos da rodada no futebol brasileiro", summary: "Confira horários e canais de TV fechada, aberta e streaming dos confrontos desta semana.", date: "28/09/2026", url: "https://ge.globo.com" },
-    { id: 102, team: "Seleção Brasileira", title: "Brasil x Austrália: Horários, prováveis escalações e onde assistir ao vivo", summary: "Seleção entra em campo nesta segunda em preparação para os próximos desafios internacionais.", date: "28/09/2026", url: "https://ge.globo.com/futebol/selecao-brasileira/" },
-    { id: 103, team: "Feminino", title: "Derby no Brasileirão Feminino mobiliza Corinthians e Palmeiras em fase decisiva", summary: "Clássico paulista agita a reta final do campeonato nacional com cobertura completa de TV.", date: "27/09/2026", url: "https://ge.globo.com/futebol/futebol-feminino/" }
+    { 
+      id: 101, 
+      team: "Geral", 
+      title: "Guia completo de transmissões: Onde assistir aos jogos da rodada no futebol brasileiro", 
+      summary: "Confira horários e canais de TV fechada, aberta e streaming dos confrontos desta semana.", 
+      date: "28/09/2026", 
+      content: "O futebol brasileiro entra em uma de suas semanas mais decisivas na temporada de 2026. Com duelos fundamentais no Brasileirão Série A, Série B e nos campeonatos femininos, o torcedor precisa ficar atento às opções de transmissão.\n\nA TV Globo transmitirá os jogos selecionados das noites de quarta-feira e tardes de domingo. Nos canais fechados, a SporTV e a ESPN lideram a grade de programação, enquanto o Premiere assegura 100% dos confrontos das Séries A e B no Pay-Per-View.\n\nPara quem prefere o streaming, plataformas como CazéTV, Max e Disney+ oferecem transmissões em alta definição com narrações exclusivas e análises de pré-jogo."
+    },
+    { 
+      id: 102, 
+      team: "Seleção Brasileira", 
+      title: "Brasil x Austrália: Horários, prováveis escalações e onde assistir ao vivo", 
+      summary: "Seleção entra em campo nesta segunda em preparação para os próximos desafios internacionais.", 
+      date: "28/09/2026", 
+      content: "A Seleção Brasileira masculina volta a campo nesta segunda-feira para enfrentar a Austrália em partida amistosa preparatória.\n\nO técnico da Seleção testará novas opções no setor de meio-campo e ataque, dando rodagem a jovens destaques do futebol nacional e europeu. A partida terá início às 18:30 (horário de Brasília) e contará com transmissão ao vivo na TV Globo e no SporTV."
+    },
+    { 
+      id: 103, 
+      team: "Feminino", 
+      title: "Derby no Brasileirão Feminino mobiliza Corinthians e Palmeiras em fase decisiva", 
+      summary: "Clássico paulista agita a reta final do campeonato nacional com cobertura completa de TV.", 
+      date: "27/09/2026", 
+      content: "As equipes femininas de Corinthians e Palmeiras se preparam para mais um Derby épico pelo Brasileirão Feminino.\n\nCom as duas equipes no topo da tabela e com vaga garantida nas fases finais, a partida vale a liderança isolada e o favoritismo para o título nacional. O jogo terá transmissão do SporTV e da TV Brasil."
+    }
   ],
   "Flamengo": [
-    { id: 201, team: "Flamengo", title: "Flamengo intensifica treinos táticos no Ninho do Urubu visando o próximo duelo", summary: "Comandante ajusta o posicionamento ofensivo e busca manter o time no topo da tabela do Brasileirão.", date: "28/09/2026", url: "https://ge.globo.com/futebol/times/flamengo/" },
-    { id: 202, team: "Flamengo", title: "Ingressos para o próximo confronto do Flamengo no Maracanã já estão à venda", summary: "Sócio-torcedores têm prioridade no resgate das entradas. Estádio promete casa cheia.", date: "27/09/2026", url: "https://ge.globo.com/futebol/times/flamengo/" },
-    { id: 203, team: "Flamengo", title: "Departamento Médico do Flamengo atualiza situação dos atletas lesionados", summary: "Transição física avança e atacante pode retornar antes do prazo previsto no Ninho.", date: "26/09/2026", url: "https://ge.globo.com/futebol/times/flamengo/" }
+    { 
+      id: 201, 
+      team: "Flamengo", 
+      title: "Flamengo intensifica treinos táticos no Ninho do Urubu visando o próximo duelo", 
+      summary: "Comandante ajusta o posicionamento ofensivo e busca manter o time no topo da tabela do Brasileirão.", 
+      date: "28/09/2026", 
+      content: "O elenco do Flamengo realizou mais uma sessão intensa de treinos no Ninho do Urubu sob o comando da comissão técnica. O foco do trabalho esteve na rápida transição ofensiva e no aprimoramento das finalizações.\n\nCom o apoio da torcida no Maracanã no próximo compromisso, a equipe busca somar três pontos para se manter firme na disputa do título do Brasileirão 2026."
+    }
   ],
   "Palmeiras": [
-    { id: 301, team: "Palmeiras", title: "Palmeiras foca em bola parada no Allianz Parque para manter sequência positiva", summary: "Equipe alviverde finaliza preparação com atenção especial aos detalhes defensivos e táticos.", date: "28/09/2026", url: "https://ge.globo.com/futebol/times/palmeiras/" },
-    { id: 302, team: "Palmeiras", title: "Destaque da base do Palmeiras assina renovação de contrato de longa duração", summary: "Jovem promessa firma novo vínculo com cláusula rescisória protegida contra o futebol europeu.", date: "27/09/2026", url: "https://ge.globo.com/futebol/times/palmeiras/" },
-    { id: 303, team: "Palmeiras", title: "Palmeiras Feminino projeta clássico decisivo e convoca torcida nas redes", summary: "Elenco feminino encerra preparação para o Derby decisivo do Brasileirão da categoria.", date: "26/09/2026", url: "https://ge.globo.com/futebol/times/palmeiras/" }
+    { 
+      id: 301, 
+      team: "Palmeiras", 
+      title: "Palmeiras foca em bola parada no Allianz Parque para manter sequência positiva", 
+      summary: "Equipe alviverde finaliza preparação com atenção especial aos detalhes defensivos e táticos.", 
+      date: "28/09/2026", 
+      content: "Na Academia de Futebol, o Palmeiras realizou ajustes decisivos nas jogadas ensaiadas de bola parada antes do próximo confronto pelo campeonato.\n\nA equipe alviverde vive grande momento na temporada e busca manter o aproveitamento elevado jogando no Allianz Parque."
+    }
   ]
 };
 
@@ -124,16 +179,16 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('matches');
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLeague, setSelectedLeague] = useState('todas');
   const [selectedStandingLeague, setSelectedStandingLeague] = useState('Brasileirão Série A');
   const [selectedTeamFilter, setSelectedTeamFilter] = useState(null);
   const [selectedNewsTeam, setSelectedNewsTeam] = useState('Destaques');
+  const [selectedArticle, setSelectedArticle] = useState(null);
+  const [dateFilter, setDateFilter] = useState('todos');
 
   const fetchMatches = async () => {
     setLoading(true);
-    setError(null);
     try {
       const res = await fetch('/api/matches');
       let apiMatches = [];
@@ -174,49 +229,74 @@ export default function App() {
     const matchesLeague = selectedLeague === 'todas' || leagueName === selectedLeague;
     const matchesTeamFilter = !selectedTeamFilter || homeName.toLowerCase().includes(selectedTeamFilter.toLowerCase()) || awayName.toLowerCase().includes(selectedTeamFilter.toLowerCase());
 
-    return matchesSearch && matchesLeague && matchesTeamFilter;
+    // Filtro rápido por Data
+    const matchDateStr = new Date(match.utcDate).toISOString().split('T')[0];
+    let matchesDate = true;
+    if (dateFilter === 'hoje') matchesDate = matchDateStr === TODAY_DATE;
+
+    return matchesSearch && matchesLeague && matchesTeamFilter && matchesDate;
   });
 
   const newsList = NEWS_BY_TEAM[selectedNewsTeam] || NEWS_BY_TEAM["Destaques"];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-12">
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-12 selection:bg-emerald-500 selection:text-slate-950">
       {/* Header com Navegação */}
-      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <header className="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
+        <div className="max-w-4xl mx-auto px-4 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center space-x-3">
-            <div className="bg-emerald-500 p-2 rounded-xl text-slate-950">
+            <div className="bg-emerald-500 p-2 rounded-xl text-slate-950 shadow-lg shadow-emerald-500/20">
               <Tv className="w-6 h-6 stroke-[2.5]" />
             </div>
             <div>
               <h1 className="text-xl font-black tracking-tight text-white flex items-center gap-1.5">
-                Onde tem Jogo? <span className="text-xs font-bold bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">AO VIVO</span>
+                Onde tem Jogo? <span className="text-[10px] font-bold bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 uppercase tracking-wider">AO VIVO</span>
               </h1>
-              <p className="text-xs text-slate-400">Guia de Partidas, Tabelas, Notícias e Transmissões</p>
+              <p className="text-xs text-slate-400">Guia de Transmissões, Tabelas, Notícias e Artilharia</p>
             </div>
           </div>
 
           {/* Abas de Navegação Principal */}
-          <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+          <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800/80 overflow-x-auto scrollbar-none">
             <button
               onClick={() => setActiveTab('matches')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                 activeTab === 'matches' 
                   ? 'bg-emerald-500 text-slate-950 shadow' 
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <Calendar className="w-3.5 h-3.5" /> Próximos Jogos
+              <Calendar className="w-3.5 h-3.5" /> Jogos
             </button>
             <button
               onClick={() => setActiveTab('standings')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                 activeTab === 'standings' 
                   ? 'bg-emerald-500 text-slate-950 shadow' 
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <ListOrdered className="w-3.5 h-3.5" /> Classificação
+              <ListOrdered className="w-3.5 h-3.5" /> Tabela
+            </button>
+            <button
+              onClick={() => setActiveTab('guide')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                activeTab === 'guide' 
+                  ? 'bg-emerald-500 text-slate-950 shadow' 
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Tv className="w-3.5 h-3.5" /> Onde Assistir
+            </button>
+            <button
+              onClick={() => setActiveTab('scorers')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                activeTab === 'scorers' 
+                  ? 'bg-emerald-500 text-slate-950 shadow' 
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Flame className="w-3.5 h-3.5" /> Artilharia
             </button>
           </div>
         </div>
@@ -228,7 +308,7 @@ export default function App() {
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span className="font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-              <Shield className="w-4 h-4 text-emerald-400" /> Times em Destaque (Filtrar Jogos & Notícias)
+              <Shield className="w-4 h-4 text-emerald-400" /> Times em Destaque (Filtrar Conteúdo)
             </span>
             {(selectedTeamFilter || selectedNewsTeam !== 'Destaques') && (
               <button 
@@ -260,12 +340,12 @@ export default function App() {
                 }}
                 className={`p-2.5 rounded-xl border flex flex-col items-center justify-center min-w-[85px] transition ${
                   selectedTeamFilter === team.name || selectedNewsTeam === team.name
-                    ? 'bg-emerald-500/20 border-emerald-500 scale-105' 
+                    ? 'bg-emerald-500/20 border-emerald-500 scale-105 shadow-lg shadow-emerald-500/10' 
                     : 'bg-slate-900 border-slate-800 hover:border-slate-700'
                 }`}
               >
                 <div className="w-9 h-9 flex items-center justify-center mb-1">
-                  <img src={team.crest} alt={team.name} className="max-w-full max-h-full object-contain filter drop-shadow-sm" />
+                  <img src={team.crest} alt={team.name} className="max-w-full max-h-full object-contain filter drop-shadow" />
                 </div>
                 <span className="text-[10px] font-semibold text-slate-200 truncate max-w-[75px]">{team.name}</span>
                 <span className="text-[9px] text-slate-400">{team.state}</span>
@@ -278,15 +358,33 @@ export default function App() {
         {activeTab === 'matches' && (
           <div className="space-y-6">
             <div className="space-y-3">
-              <div className="relative">
-                <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input 
-                  type="text" 
-                  placeholder="Buscar por time, categoria (ex: Feminino, Sub-20), estádio..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
-                />
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input 
+                    type="text" 
+                    placeholder="Buscar por time, categoria (Feminino, Sub-20), estádio..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
+                  />
+                </div>
+
+                {/* Filtro Rápido por Data */}
+                <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 p-1 rounded-xl text-xs font-semibold">
+                  <button 
+                    onClick={() => setDateFilter('todos')} 
+                    className={`px-3 py-1.5 rounded-lg transition ${dateFilter === 'todos' ? 'bg-emerald-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'}`}
+                  >
+                    Todos
+                  </button>
+                  <button 
+                    onClick={() => setDateFilter('hoje')} 
+                    className={`px-3 py-1.5 rounded-lg transition ${dateFilter === 'hoje' ? 'bg-emerald-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'}`}
+                  >
+                    Hoje
+                  </button>
+                </div>
               </div>
 
               {leagues.length > 1 && (
@@ -418,7 +516,7 @@ export default function App() {
           </div>
         )}
 
-        {/* ABA 2: TABELA DE CLASSIFICAÇÃO COM BARRAS LATERAIS E DESTAQUE VISUAL */}
+        {/* ABA 2: TABELA DE CLASSIFICAÇÃO COM BARRAS LATERAIS */}
         {activeTab === 'standings' && (
           <div className="space-y-6">
             <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs scrollbar-thin">
@@ -513,7 +611,62 @@ export default function App() {
           </div>
         )}
 
-        {/* Seção Dinâmica de Notícias com Filtro por Time */}
+        {/* ABA 3: GUIA DE ONDE ASSISTIR */}
+        {activeTab === 'guide' && (
+          <div className="space-y-4">
+            <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+              <Tv className="w-4 h-4 text-emerald-400" /> Onde Assistir: Plataformas & Canais Principais
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {STREAMING_GUIDE.map((item, idx) => (
+                <div key={idx} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-emerald-400 text-sm">{item.name}</h3>
+                    <span className="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded font-semibold">{item.badge}</span>
+                  </div>
+                  <p className="text-xs text-slate-300 font-medium">{item.type}</p>
+                  <p className="text-xs text-slate-400">{item.details}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ABA 4: TOP ARTILHARIA */}
+        {activeTab === 'scorers' && (
+          <div className="space-y-4">
+            <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+              <Flame className="w-4 h-4 text-emerald-400" /> Principais Artilheiros da Temporada
+            </h2>
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+              <table className="w-full text-left text-xs text-slate-300">
+                <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+                  <tr>
+                    <th className="p-3 text-center">#</th>
+                    <th className="p-3">Jogador</th>
+                    <th className="p-3">Clube / Liga</th>
+                    <th className="p-3 text-center">Gols</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 font-medium">
+                  {TOP_SCORERS.map(s => (
+                    <tr key={s.rank} className="hover:bg-slate-800/40">
+                      <td className="p-3 text-center font-bold text-slate-400">{s.rank}</td>
+                      <td className="p-3 font-bold text-slate-100">{s.name}</td>
+                      <td className="p-3 flex items-center gap-2">
+                        <img src={s.crest} alt={s.team} className="w-4 h-4 object-contain" />
+                        <span>{s.team} <span className="text-[10px] text-slate-500">({s.league})</span></span>
+                      </td>
+                      <td className="p-3 text-center font-black text-emerald-400 text-sm">{s.goals}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Seção Dinâmica de Notícias com Leitura Interna Completa */}
         <section className="space-y-4 pt-6 border-t border-slate-800">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
@@ -538,12 +691,10 @@ export default function App() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {newsList.map(item => (
-              <a 
+              <div 
                 key={item.id} 
-                href={item.url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between hover:border-emerald-500/50 transition group"
+                onClick={() => setSelectedArticle(item)}
+                className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between hover:border-emerald-500/50 transition cursor-pointer group"
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-[11px] text-slate-400">
@@ -559,15 +710,55 @@ export default function App() {
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs font-semibold text-emerald-400">
-                  <span>Ler matéria no ge</span>
-                  <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
+                  <span>Ler matéria completa</span>
+                  <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition" />
                 </div>
-              </a>
+              </div>
             ))}
           </div>
         </section>
 
       </main>
+
+      {/* Modal de Leitura de Notícia Completa (Ideais para Exibir Anúncios do AdSense) */}
+      {selectedArticle && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-2xl relative">
+            <button 
+              onClick={() => setSelectedArticle(null)}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white bg-slate-800 rounded-full transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-2">
+              <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded text-xs font-bold">
+                {selectedArticle.team}
+              </span>
+              <h2 className="text-xl font-black text-white leading-snug pt-1">
+                {selectedArticle.title}
+              </h2>
+              <p className="text-xs text-slate-400">Publicado em {selectedArticle.date} • Onde Tem Jogo</p>
+            </div>
+
+            <hr className="border-slate-800" />
+
+            <div className="text-sm text-slate-300 leading-relaxed whitespace-pre-line space-y-3">
+              {selectedArticle.content}
+            </div>
+
+            <div className="pt-4 border-t border-slate-800 flex justify-end">
+              <button 
+                onClick={() => setSelectedArticle(null)}
+                className="bg-emerald-500 text-slate-950 px-4 py-2 rounded-xl font-bold text-xs hover:bg-emerald-400 transition"
+              >
+                Fechar Notícia
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
