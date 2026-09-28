@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Tv, Calendar, Search, Trophy, RefreshCw, AlertCircle, Newspaper, ExternalLink, MapPin, Shield, UserCheck, ListOrdered } from 'lucide-react';
+import { Tv, Calendar, Search, Trophy, RefreshCw, AlertCircle, Newspaper, ExternalLink, MapPin, Shield, UserCheck, ListOrdered, Info } from 'lucide-react';
 
 // Escudos Padronizados
 const BRASIL_TEAMS = [
@@ -403,6 +403,7 @@ export default function App() {
                           </div>
                         </div>
 
+                        {/* Localização e Transmissão */}
                         <div className="pt-2 border-t border-slate-800/40 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
                           <div className="flex items-center gap-1.5">
                             <MapPin className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
@@ -412,6 +413,12 @@ export default function App() {
                             <Tv className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
                             <span>Onde assistir: <strong className="text-emerald-400">{tvChannel}</strong></span>
                           </div>
+                        </div>
+
+                        {/* Aviso sobre os requisitos de streaming */}
+                        <div className="pt-2 border-t border-slate-800/20 flex items-center gap-1.5 text-[11px] text-slate-400 italic">
+                          <Info className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                          <span>Os requisitos de acesso podem variar de acordo com o serviço de streaming.</span>
                         </div>
 
                       </div>
