@@ -125,7 +125,7 @@ const EXTRA_MATCHES = [
   }
 ];
 
-// Banco de Notícias Automatizadas por Clube com Conteúdo Interno Completo
+// Banco de Notícias Completo (Mapeado exatamente para o nome de CADA um dos 12 times)
 const NEWS_BY_TEAM = {
   "Destaques": [
     { 
@@ -171,6 +171,106 @@ const NEWS_BY_TEAM = {
       summary: "Equipe alviverde finaliza preparação com atenção especial aos detalhes defensivos e táticos.", 
       date: "28/09/2026", 
       content: "Na Academia de Futebol, o Palmeiras realizou ajustes decisivos nas jogadas ensaiadas de bola parada antes do próximo confronto pelo campeonato.\n\nA equipe alviverde vive grande momento na temporada e busca manter o aproveitamento elevado jogando no Allianz Parque."
+    }
+  ],
+  "São Paulo": [
+    { 
+      id: 401, 
+      team: "São Paulo", 
+      title: "São Paulo ajusta escalação no MorrumBIS visando entrar forte no G-4 do Brasileirão", 
+      summary: "Comissão técnica ajusta posicionamento do meio-campo para dar maior ritmo ao ataque são-paulino.", 
+      date: "28/09/2026", 
+      content: "O São Paulo finalizou a preparação tática no CT da Barra Funda para a próxima rodada. O técnico tricolor testou opções ofensivas visando furar o bloqueio do adversário no MorrumBIS.\n\nA torcida promete grande presença nas arquibancadas para embalar o Tricolor rumo às vagas diretas da Libertadores."
+    }
+  ],
+  "Corinthians": [
+    { 
+      id: 501, 
+      team: "Corinthians", 
+      title: "Corinthians intensifica treinos na Neo Química Arena focado na reabilitação na tabela", 
+      summary: "Fiel torcida prepara grande recepção enquanto o elenco faz acertos táticos no gramado.", 
+      date: "28/09/2026", 
+      content: "O Corinthians realizou o último treino antes de entrar em campo na Neo Química Arena. A comissão técnica enfatizou a marcação sob pressão e o aproveitamento das chances em velocidade.\n\nO Timão busca engrenar uma sequência de vitórias em casa para se distanciar da parte inferior da tabela de classificação."
+    }
+  ],
+  "Santos": [
+    { 
+      id: 601, 
+      team: "Santos", 
+      title: "Santos busca consolidar o topo da Série B em noite decisiva na Vila Belmiro", 
+      summary: "Peixe joga em casa diante da sua torcida para dar passo fundamental rumo ao acesso.", 
+      date: "28/09/2026", 
+      content: "A Vila Belmiro será palco de mais uma batalha decisiva para o Santos no Campeonato Brasileiro Série B.\n\nCom ingressos praticamente esgotados, o Peixe confia no talento de seus atacantes e na força das arquibancadas para conquistar três pontos e manter a liderança da competição."
+    }
+  ],
+  "Fluminense": [
+    { 
+      id: 701, 
+      team: "Fluminense", 
+      title: "Fluminense trabalha jogadas de articulação no CT Carlos Castilho", 
+      summary: "Tricolor das Laranjeiras busca pontuar no próximo jogo para subir posições na classificação.", 
+      date: "28/09/2026", 
+      content: "O Fluminense concluiu os trabalhos táticos antes de encarar o próximo duelo da temporada. O grupo focou em trocas de passes rápidas e finalizações de média distância.\n\nA equipe carioca aposta na experiência de seus líderes para comandar o time rumo ao resultado positivo."
+    }
+  ],
+  "Vasco da Gama": [
+    { 
+      id: 801, 
+      team: "Vasco da Gama", 
+      title: "Vasco mobiliza torcida em São Januário para confronto importantíssimo", 
+      summary: "Cruzmaltino busca fazer valer o mando de campo para assegurar vaga nos torneios continentais.", 
+      date: "28/09/2026", 
+      content: "O Vasco da Gama encerrou sua preparação em São Januário para a próxima rodada. O ambiente na Colina Histórica é de confiança e apoio irrestrito ao time.\n\nCom a estratégia definida pelo treinador, o Vasco entra em campo focado em garantir a vitória perante o seu torcedor."
+    }
+  ],
+  "Botafogo": [
+    { 
+      id: 901, 
+      team: "Botafogo", 
+      title: "Líder Botafogo treina movimentação no Nilton Santos com foco no título", 
+      summary: "Glorioso busca manter a regularidade no topo com apoio total da torcida alvinegra.", 
+      date: "28/09/2026", 
+      content: "O Botafogo segue firme na liderança do campeonato e ajustou os últimos detalhes no gramado do Nilton Santos.\n\nA comissão técnica cobra intensidade máxima desde os primeiros minutos para impor o ritmo de jogo e garantir mais três pontos na busca pela taça."
+    }
+  ],
+  "Grêmio": [
+    { 
+      id: 1001, 
+      team: "Grêmio", 
+      title: "Grêmio treina saída rápida de bola no CT Luiz Carvalho antes de clássico em casa", 
+      summary: "Tricolor gaúcho quer impor intensidade jogando na Arena do Grêmio.", 
+      date: "28/09/2026", 
+      content: "O Grêmio finalizou as atividades táticas visando seu próximo compromisso pelo Brasileirão. A comissão técnica promoveu treinos de bola parada e transição ofensiva.\n\nA torcida gremista promete encher a Arena para empurrar o time em busca de posições mais elevadas na tabela."
+    }
+  ],
+  "Internacional": [
+    { 
+      id: 1101, 
+      team: "Internacional", 
+      title: "Internacional foca em compactação defensiva no Beira-Rio para buscar a vitória", 
+      summary: "Colorado busca somar três pontos diante de sua torcida para se aproximar do G-6.", 
+      date: "28/09/2026", 
+      content: "No CT Parque Gigante, o Internacional concluiu a preparação para o desafio desta semana. O técnico colorado priorizou ajustes no posicionamento sem a bola e triangulações nos lados do campo.\n\nO Beira-Rio terá grande presença de público para empurrar a equipe gaúcha."
+    }
+  ],
+  "Atlético Mineiro": [
+    { 
+      id: 1201, 
+      team: "Atlético Mineiro", 
+      title: "Atlético-MG se prepara na Arena MRV para mais um grande duelo pelo campeonato", 
+      summary: "Galo busca impor seu ritmo de jogo com casa cheia em Belo Horizonte.", 
+      date: "28/09/2026", 
+      content: "O Atlético-MG finalizou a preparação física e tática na Arena MRV. O Galo almeja manter a invencibilidade em seu novo estádio e somar pontos preciosos na reta decisiva da temporada."
+    }
+  ],
+  "Cruzeiro": [
+    { 
+      id: 1301, 
+      team: "Cruzeiro", 
+      title: "Cruzeiro faz ajustes finais na Toca da Raposa focado em somar 3 pontos no Mineirão", 
+      summary: "Raposa trabalha movimentação ofensiva e busca aproximação dos líderes.", 
+      date: "28/09/2026", 
+      content: "O Cruzeiro encerrou os preparativos na Toca da Raposa 2 antes de encarar seu próximo adversário no Gigante da Pampulha.\n\nA Nação Azul promete lotar o Mineirão para empurrar a equipe em busca de mais uma vitória decisiva na temporada."
     }
   ]
 };
@@ -720,7 +820,7 @@ export default function App() {
 
       </main>
 
-      {/* Modal de Leitura de Notícia Completa (Ideais para Exibir Anúncios do AdSense) */}
+      {/* Modal de Leitura de Notícia Completa */}
       {selectedArticle && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-2xl relative">
