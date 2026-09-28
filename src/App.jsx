@@ -17,7 +17,7 @@ const BRASIL_TEAMS = [
   { id: 12, name: "Cruzeiro", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9782.png", state: "MG", stadium: "Mineirão" }
 ];
 
-// Tabelas de Classificação Completas (incluindo Brasileirão Feminino)
+// Tabelas de Classificação Completas
 const STANDINGS_DATA = {
   "Brasileirão Série A": [
     { pos: 1, name: "Botafogo", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8517.png", pts: 56, pj: 27, v: 17, e: 5, d: 5, sg: 22, status: "libertadores" },
@@ -110,32 +110,74 @@ const EXTRA_MATCHES = [
   }
 ];
 
-const initialNews = [
-  {
-    id: 1,
-    title: "São Paulo x Santos: Onde assistir ao vivo, horário e prováveis escalações",
-    summary: "Clássico San-São movimenta o futebol paulista no MorrumBIS. Confira detalhes da transmissão.",
-    category: "Brasileirão",
-    date: "27/09/2026",
-    url: "https://ge.globo.com"
-  },
-  {
-    id: 2,
-    title: "Brasil x Austrália: Confira o horário e onde assistir ao amistoso da Seleção",
-    summary: "Seleção Brasileira entra em campo nesta segunda-feira. Veja todas as novidades do elenco.",
-    category: "Seleção Brasileira",
-    date: "27/09/2026",
-    url: "https://ge.globo.com/futebol/selecao-brasileira/"
-  },
-  {
-    id: 3,
-    title: "Brasileirão Feminino e Séries A e B em destaque nos canais de esporte",
-    summary: "Confira horários e canais de TV de todas as partidas da semana no futebol nacional e internacional.",
-    category: "Feminino & Guias de TV",
-    date: "26/09/2026",
-    url: "https://uol.com.br/esporte"
-  }
-];
+// Banco de Notícias Organizado por Clube (3 Notícias para cada time)
+const NEWS_BY_TEAM = {
+  "Destaques": [
+    { id: 101, team: "Geral", title: "Guia completo de transmissões: Onde assistir aos jogos da rodada no futebol brasileiro", summary: "Confira horários e canais de TV fechada, aberta e streaming dos confrontos desta semana.", date: "28/09/2026", url: "https://ge.globo.com" },
+    { id: 102, team: "Seleção Brasileira", title: "Brasil x Austrália: Horários, prováveis escalações e onde assistir ao vivo", summary: "Seleção entra em campo nesta segunda em preparação para os próximos desafios internacionais.", date: "28/09/2026", url: "https://ge.globo.com/futebol/selecao-brasileira/" },
+    { id: 103, team: "Feminino", title: "Derby no Brasileirão Feminino mobiliza Corinthians e Palmeiras em fase decisiva", summary: "Clássico paulista agita a reta final do campeonato nacional com cobertura completa de TV.", date: "27/09/2026", url: "https://ge.globo.com/futebol/futebol-feminino/" }
+  ],
+  "Flamengo": [
+    { id: 201, team: "Flamengo", title: "Flamengo intensifica treinos táticos no Ninho do Urubu visando o próximo duelo", summary: "Comandante ajusta o posicionamento ofensivo e busca manter o time no topo da tabela do Brasileirão.", date: "28/09/2026", url: "https://ge.globo.com/futebol/times/flamengo/" },
+    { id: 202, team: "Flamengo", title: "Ingressos para o próximo confronto do Flamengo no Maracanã já estão à venda", summary: "Sócio-torcedores têm prioridade no resgate das entradas. Estádio promete casa cheia.", date: "27/09/2026", url: "https://ge.globo.com/futebol/times/flamengo/" },
+    { id: 203, team: "Flamengo", title: "Departamento Médico do Flamengo atualiza situação dos atletas lesionados", summary: "Transição física avança e atacante pode retornar antes do prazo previsto no Ninho.", date: "26/09/2026", url: "https://ge.globo.com/futebol/times/flamengo/" }
+  ],
+  "Palmeiras": [
+    { id: 301, team: "Palmeiras", title: "Palmeiras foca em bola parada no Allianz Parque para manter sequência positiva", summary: "Equipe alviverde finaliza preparação com atenção especial aos detalhes defensivos e táticos.", date: "28/09/2026", url: "https://ge.globo.com/futebol/times/palmeiras/" },
+    { id: 302, team: "Palmeiras", title: "Destaque da base do Palmeiras assina renovação de contrato de longa duração", summary: "Jovem promessa firma novo vínculo com cláusula rescisória protegida contra o futebol europeu.", date: "27/09/2026", url: "https://ge.globo.com/futebol/times/palmeiras/" },
+    { id: 303, team: "Palmeiras", title: "Palmeiras Feminino projeta clássico decisivo e convoca torcida nas redes", summary: "Elenco feminino encerra preparação para o Derby decisivo do Brasileirão da categoria.", date: "26/09/2026", url: "https://ge.globo.com/futebol/times/palmeiras/" }
+  ],
+  "São Paulo": [
+    { id: 401, team: "São Paulo", title: "São Paulo ajusta escalação no MorrumBIS visando subir no G-4 do Brasileirão", summary: "Técnico testa opções no meio-campo para dar maior fluidez ao setor de criação tricolor.", date: "28/09/2026", url: "https://ge.globo.com/futebol/times/sao-paulo/" },
+    { id: 402, team: "São Paulo", title: "MorrumBIS registra grande procura de ingressos para a próxima rodada", summary: "Torcida são-paulina prepara recepção especial para empurrar a equipe em casa.", date: "27/09/2026", url: "https://ge.globo.com/futebol/times/sao-paulo/" },
+    { id: 403, team: "São Paulo", title: "Lateral do São Paulo destaca apoio da torcida e projeta sequência de vitórias", summary: "Em entrevista coletiva, atleta frisa a importância de somar pontos na reta final da temporada.", date: "26/09/2026", url: "https://ge.globo.com/futebol/times/sao-paulo/" }
+  ],
+  "Corinthians": [
+    { id: 501, team: "Corinthians", title: "Corinthians treina forte na Neo Química Arena com foco na recuperação na tabela", summary: "Elenco alvinegro trabalha jogadas ensaiadas e busca entrosamento para os próximos desafios.", date: "28/09/2026", url: "https://ge.globo.com/futebol/times/corinthians/" },
+    { id: 502, team: "Corinthians", title: "Fiel Torcida esgota setor nobre da Neo Química Arena para o próximo jogo", summary: "Apoio incondicional das arquibancadas é a aposta do Timão para buscar o resultado positivo.", date: "27/09/2026", url: "https://ge.globo.com/futebol/times/corinthians/" },
+    { id: 503, team: "Corinthians", title: "Corinthians Feminino define estratégia para o clássico no futebol feminino", summary: "Brabas do Timão buscam confirmar o favoritismo e manter a liderança da competição.", date: "26/09/2026", url: "https://ge.globo.com/futebol/times/corinthians/" }
+  ],
+  "Santos": [
+    { id: 601, team: "Santos", title: "Santos finaliza apronto na Vila Belmiro para confronto direto na Série B", summary: "Peixe busca três pontos fundamentais para consolidar o acesso de volta à elite nacional.", date: "28/09/2026", url: "https://ge.globo.com/futebol/times/santos/" },
+    { id: 602, team: "Santos", title: "Meninos da Vila ganham espaço nos treinos e agradam comissão técnica", summary: "Jovens talentos da base santista são testados no time principal visando a sequência de partidas.", date: "27/09/2026", url: "https://ge.globo.com/futebol/times/santos/" },
+    { id: 603, team: "Santos", title: "Vila Belmiro terá casa cheia para apoiar o Santos na noite desta segunda", summary: "Todos os ingressos colocados à venda para os torcedores santistas foram esgotados.", date: "26/09/2026", url: "https://ge.globo.com/futebol/times/santos/" }
+  ],
+  "Vasco da Gama": [
+    { id: 701, team: "Vasco da Gama", title: "Vasco intensifica preparação em São Januário com portões fechados", summary: "Comissão técnica testa novas formações táticas para surpreender o adversário na rodada.", date: "28/09/2026", url: "https://ge.globo.com/futebol/times/vasco/" },
+    { id: 702, team: "Vasco da Gama", title: "Caldeirão de São Januário se prepara para mais uma grande festa da torcida", summary: "Vascainos organizam recepção ao ônibus da delegação na chegada ao estádio.", date: "27/09/2026", url: "https://ge.globo.com/futebol/times/vasco/" },
+    { id: 703, team: "Vasco da Gama", title: "Meia do Vasco comemora evolução física e se coloca à disposição do treinador", summary: "Atleta recuperado de contusão treina sem limitações com o restante do grupo no CT.", date: "26/09/2026", url: "https://ge.globo.com/futebol/times/vasco/" }
+  ],
+  "Botafogo": [
+    { id: 801, team: "Botafogo", title: "Líder Botafogo treina no Nilton Santos com foco em manter a vantagem", summary: "Glorioso trabalha forte no gramado sintético buscando manter a consistência no campeonato.", date: "28/09/2026", url: "https://ge.globo.com/futebol/times/botafogo/" },
+    { id: 802, team: "Botafogo", title: "Torcida do Botafogo prepara mosaico especial para o próximo compromisso", summary: "Festa no Estádio Nilton Santos promete motivar o time na luta pelos objetivos da temporada.", date: "27/09/2026", url: "https://ge.globo.com/futebol/times/botafogo/" },
+    { id: 803, team: "Botafogo", title: "Atacante do Botafogo se destaca em estatísticas de finalização no Brasileirão", summary: "Números comprovam a eficiência do setor ofensivo alvinegro nas últimas rodadas.", date: "26/09/2026", url: "https://ge.globo.com/futebol/times/botafogo/" }
+  ],
+  "Fluminense": [
+    { id: 901, team: "Fluminense", title: "Fluminense faz ajustes no CT Carlos Castilho antes de decisão no Maracanã", summary: "Tricolor das Laranjeiras busca reabilitação para subir posições na tabela de classificação.", date: "28/09/2026", url: "https://ge.globo.com/futebol/times/fluminense/" },
+    { id: 902, team: "Fluminense", title: "Xodó da torcida tricolor treina em separado e passa por reavaliação médica", summary: "Equipe médica acompanha evolução do atleta para definir presença na relação de relacionados.", date: "27/09/2026", url: "https://ge.globo.com/futebol/times/fluminense/" },
+    { id: 903, team: "Fluminense", title: "Fluminense convoca torcedores para apoiar o time no próximo jogo em casa", summary: "Check-in de sócios está aberto com alta adesão para a partida no Maracanã.", date: "26/09/2026", url: "https://ge.globo.com/futebol/times/fluminense/" }
+  ],
+  "Grêmio": [
+    { id: 1001, team: "Grêmio", title: "Grêmio trabalha transição defensiva no CT Luiz Carvalho visando o próximo jogo", summary: "Técnico gremista orienta posicionamento e cobra atenção nos minutos iniciais da partida.", date: "28/09/2026", url: "https://ge.globo.com/futebol/times/gremio/" },
+    { id: 1002, team: "Grêmio", title: "Arena do Grêmio projeta grande público para apoiar a equipe tricolor gaúcha", summary: "Mobilização da torcida gremista promete forte atmosfera no estádio em Porto Alegre.", date: "27/09/2026", url: "https://ge.globo.com/futebol/times/gremio/" },
+    { id: 1003, team: "Grêmio", title: "Goleiro do Grêmio celebra boa fase e destaca união do elenco tricolor", summary: "Em entrevista, camisa 1 ressalta o empenho coletivo para alcançar os objetivos da equipe.", date: "26/09/2026", url: "https://ge.globo.com/futebol/times/gremio/" }
+  ],
+  "Internacional": [
+    { id: 1101, team: "Internacional", title: "Internacional finaliza treinos no CT Parque Gigante com novidades na equipe", summary: "Colorado busca manter a solidez tática no Beira-Rio para garantir pontos preciosos.", date: "28/09/2026", url: "https://ge.globo.com/futebol/times/internacional/" },
+    { id: 1102, team: "Internacional", title: "Sócio-torcedor do Inter lota setores do Beira-Rio para o confronto do fim de semana", summary: "Mobilização vermelha promete transformar o estádio em um verdadeiro caldeirão.", date: "27/09/2026", url: "https://ge.globo.com/futebol/times/internacional/" },
+    { id: 1103, team: "Internacional", title: "Atacante do Inter destaca entrosamento do setor ofensivo em fase positiva", summary: "Com grande aproveitamento recente, jogador valoriza o empenho do grupo nos treinos.", date: "26/09/2026", url: "https://ge.globo.com/futebol/times/internacional/" }
+  ],
+  "Atlético Mineiro": [
+    { id: 1201, team: "Atlético Mineiro", title: "Atlético-MG se prepara na Arena MRV para mais um grande desafio no ano", summary: "Galo trabalha jogadas ofensivas de velocidade para pressionar o adversário desde o início.", date: "28/09/2026", url: "https://ge.globo.com/futebol/times/atletico-mg/" },
+    { id: 1202, team: "Atlético Mineiro", title: "Massa Atleticana esgota carga de ingressos na Arena MRV para a próxima rodada", summary: "Torcida alvinegra prepara grande festa com sinalizadores e bandeirões no estádio.", date: "27/09/2026", url: "https://ge.globo.com/futebol/times/atletico-mg/" },
+    { id: 1203, team: "Atlético Mineiro", title: "Meia do Galo comemora retorno e projeta sequência titular na equipe", summary: "Jogador recuperado de lesão treina sem restrições com a comissão técnica mineira.", date: "26/09/2026", url: "https://ge.globo.com/futebol/times/atletico-mg/" }
+  ],
+  "Cruzeiro": [
+    { id: 1301, team: "Cruzeiro", title: "Cruzeiro realiza treino tático na Toca da Raposa com foco em triangulações", summary: "Comissão técnica ajusta últimos detalhes da equipe que entrará em campo no Mineirão.", date: "28/09/2026", url: "https://ge.globo.com/futebol/times/cruzeiro/" },
+    { id: 1302, team: "Cruzeiro", title: "Nação Azul promete lotar o Mineirão para apoiar a Raposa no campeonato", summary: "Venda de ingressos atinge marca expressiva e confirma o entusiasmo do torcedor cruzeirense.", date: "27/09/2026", url: "https://ge.globo.com/futebol/times/cruzeiro/" },
+    { id: 1303, team: "Cruzeiro", title: "Zagueiro do Cruzeiro ressalta importância da solidez defensiva nos jogos em casa", summary: "Defensor valoriza o trabalho coletivo e projeta partida segura perante a torcida.", date: "26/09/2026", url: "https://ge.globo.com/futebol/times/cruzeiro/" }
+  ]
+};
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('matches');
@@ -146,6 +188,7 @@ export default function App() {
   const [selectedLeague, setSelectedLeague] = useState('todas');
   const [selectedStandingLeague, setSelectedStandingLeague] = useState('Brasileirão Série A');
   const [selectedTeamFilter, setSelectedTeamFilter] = useState(null);
+  const [selectedNewsTeam, setSelectedNewsTeam] = useState('Destaques');
 
   const fetchMatches = async () => {
     setLoading(true);
@@ -193,6 +236,8 @@ export default function App() {
     return matchesSearch && matchesLeague && matchesTeamFilter;
   });
 
+  const newsList = NEWS_BY_TEAM[selectedNewsTeam] || NEWS_BY_TEAM["Destaques"];
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-12">
       {/* Header com Navegação */}
@@ -206,7 +251,7 @@ export default function App() {
               <h1 className="text-xl font-black tracking-tight text-white flex items-center gap-1.5">
                 Onde tem Jogo? <span className="text-xs font-bold bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">AO VIVO</span>
               </h1>
-              <p className="text-xs text-slate-400">Guia de Partidas, Tabelas, Feminino e Transmissões</p>
+              <p className="text-xs text-slate-400">Guia de Partidas, Tabelas, Notícias e Transmissões</p>
             </div>
           </div>
 
@@ -242,17 +287,18 @@ export default function App() {
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span className="font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-              <Shield className="w-4 h-4 text-emerald-400" /> Times em Destaque (Clique para filtrar)
+              <Shield className="w-4 h-4 text-emerald-400" /> Times em Destaque (Filtrar Jogos & Notícias)
             </span>
-            {selectedTeamFilter && (
+            {(selectedTeamFilter || selectedNewsTeam !== 'Destaques') && (
               <button 
                 onClick={() => {
                   setSelectedTeamFilter(null);
+                  setSelectedNewsTeam('Destaques');
                   setSearchQuery('');
                 }}
                 className="text-emerald-400 hover:underline font-semibold"
               >
-                Limpar filtro ({selectedTeamFilter})
+                Limpar filtros
               </button>
             )}
           </div>
@@ -263,15 +309,16 @@ export default function App() {
                 onClick={() => {
                   if (selectedTeamFilter === team.name) {
                     setSelectedTeamFilter(null);
+                    setSelectedNewsTeam('Destaques');
                     setSearchQuery('');
                   } else {
                     setSelectedTeamFilter(team.name);
+                    setSelectedNewsTeam(team.name);
                     setSearchQuery(team.name);
-                    setActiveTab('matches');
                   }
                 }}
                 className={`p-2.5 rounded-xl border flex flex-col items-center justify-center min-w-[85px] transition ${
-                  selectedTeamFilter === team.name 
+                  selectedTeamFilter === team.name || selectedNewsTeam === team.name
                     ? 'bg-emerald-500/20 border-emerald-500 scale-105' 
                     : 'bg-slate-900 border-slate-800 hover:border-slate-700'
                 }`}
@@ -510,16 +557,31 @@ export default function App() {
           </div>
         )}
 
-        {/* Seção de Notícias */}
+        {/* Seção Dinâmica de Notícias com Filtro por Time */}
         <section className="space-y-4 pt-6 border-t border-slate-800">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-              <Newspaper className="w-4 h-4 text-emerald-400" /> ÚLTIMAS NOTÍCIAS & GUIAS DE TV
+              <Newspaper className="w-4 h-4 text-emerald-400" /> NOTÍCIAS & GUIAS POR CLUBE ({selectedNewsTeam})
             </h2>
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs scrollbar-thin">
+              {['Destaques', ...BRASIL_TEAMS.map(t => t.name)].map(tName => (
+                <button
+                  key={tName}
+                  onClick={() => setSelectedNewsTeam(tName)}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition ${
+                    selectedNewsTeam === tName 
+                      ? 'bg-emerald-500 text-slate-950 font-bold' 
+                      : 'bg-slate-900 text-slate-400 hover:bg-slate-800 border border-slate-800'
+                  }`}
+                >
+                  {tName}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {initialNews.map(item => (
+            {newsList.map(item => (
               <a 
                 key={item.id} 
                 href={item.url} 
@@ -529,7 +591,7 @@ export default function App() {
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-[11px] text-slate-400">
-                    <span className="bg-slate-800 text-emerald-400 px-2 py-0.5 rounded-full font-semibold">{item.category}</span>
+                    <span className="bg-slate-800 text-emerald-400 px-2 py-0.5 rounded-full font-semibold">{item.team}</span>
                     <span>{item.date}</span>
                   </div>
                   <h3 className="text-sm font-bold text-slate-100 group-hover:text-emerald-400 transition leading-snug">
@@ -541,7 +603,7 @@ export default function App() {
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs font-semibold text-emerald-400">
-                  <span>Ler matéria completa</span>
+                  <span>Ler matéria no ge</span>
                   <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
                 </div>
               </a>
