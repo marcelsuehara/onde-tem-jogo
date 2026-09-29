@@ -5,8 +5,9 @@ import {
   X, PlayCircle, Flame, Filter, ChevronRight
 } from 'lucide-react';
 
-// Escudos Padronizados
+// Escudos Padronizados (Incluindo a Seleção Brasileira)
 const BRASIL_TEAMS = [
+  { id: 0, name: "Seleção Brasileira", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8256.png", state: "CBF", stadium: "Maracanã / Mané Garrincha" },
   { id: 1, name: "Flamengo", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/5926.png", state: "RJ", stadium: "Maracanã" },
   { id: 2, name: "Palmeiras", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10283.png", state: "SP", stadium: "Allianz Parque" },
   { id: 3, name: "São Paulo", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10277.png", state: "SP", stadium: "MorrumBIS" },
@@ -21,7 +22,7 @@ const BRASIL_TEAMS = [
   { id: 12, name: "Cruzeiro", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9782.png", state: "MG", stadium: "Mineirão" }
 ];
 
-// Tabelas de Classificação Completas com Status de Zonas e Barras Coloridas
+// Tabelas de Classificação
 const STANDINGS_DATA = {
   "Brasileirão Série A": [
     { pos: 1, name: "Botafogo", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8517.png", pts: 56, pj: 27, v: 17, e: 5, d: 5, sg: 22, status: "libertadores" },
@@ -50,41 +51,22 @@ const STANDINGS_DATA = {
     { pos: 3, name: "Sport", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10279.png", pts: 46, pj: 27, v: 13, e: 7, d: 7, sg: 10, status: "libertadores" },
     { pos: 4, name: "Vila Nova", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9780.png", pts: 45, pj: 28, v: 13, e: 6, d: 9, sg: 3, status: "libertadores" },
     { pos: 17, name: "Ituano", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10285.png", pts: 28, pj: 28, v: 8, e: 4, d: 16, sg: -14, status: "z4" }
-  ],
-  "Premier League (Inglaterra)": [
-    { pos: 1, name: "Manchester City", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8456.png", pts: 13, pj: 5, v: 4, e: 1, d: 0, sg: 8, status: "libertadores" },
-    { pos: 2, name: "Liverpool", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8650.png", pts: 12, pj: 5, v: 4, e: 0, d: 1, sg: 9, status: "libertadores" },
-    { pos: 3, name: "Aston Villa", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10252.png", pts: 12, pj: 5, v: 4, e: 0, d: 1, sg: 3, status: "libertadores" },
-    { pos: 4, name: "Arsenal", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9825.png", pts: 11, pj: 5, v: 3, e: 2, d: 0, sg: 5, status: "libertadores" },
-    { pos: 5, name: "Chelsea", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8455.png", pts: 10, pj: 5, v: 3, e: 1, d: 1, sg: 6, status: "sulamericana" }
-  ],
-  "Liga Portugal": [
-    { pos: 1, name: "Sporting CP", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9768.png", pts: 18, pj: 6, v: 6, e: 0, d: 0, sg: 17, status: "libertadores" },
-    { pos: 2, name: "FC Porto", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9773.png", pts: 15, pj: 6, v: 5, e: 0, d: 1, sg: 12, status: "libertadores" },
-    { pos: 3, name: "SL Benfica", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/9772.png", pts: 13, pj: 5, v: 4, e: 1, d: 0, sg: 8, status: "pre-libertadores" }
   ]
 };
 
-// Dados de Artilharia das Ligas
 const TOP_SCORERS = [
   { rank: 1, name: "Pedro", team: "Flamengo", goals: 11, games: 21, crest: "https://images.fotmob.com/image_resources/logo/teamlogo/5926.png", league: "Brasileirão" },
   { rank: 2, name: "Estêvão", team: "Palmeiras", goals: 9, games: 22, crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10283.png", league: "Brasileirão" },
-  { rank: 3, name: "Luiz Henrique", team: "Botafogo", goals: 8, games: 24, crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8517.png", league: "Brasileirão" },
-  { rank: 4, name: "Erling Haaland", team: "Manchester City", goals: 10, games: 5, crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8456.png", league: "Premier League" },
-  { rank: 5, name: "Robert Lewandowski", team: "Barcelona", goals: 7, games: 7, crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8634.png", league: "La Liga" }
+  { rank: 3, name: "Luiz Henrique", team: "Botafogo", goals: 8, games: 24, crest: "https://images.fotmob.com/image_resources/logo/teamlogo/8517.png", league: "Brasileirão" }
 ];
 
-// Guia do Onde Assistir (Streaming & Canais de TV)
 const STREAMING_GUIDE = [
   { name: "Premiere", type: "Pay-Per-View", details: "Todos os jogos do Brasileirão Séries A e B ao vivo.", badge: "Nacional" },
   { name: "CazéTV (YouTube / Prime)", type: "Gratuito / Streaming", details: "Transmite partidas do Brasileirão, Liga Europeia e torneios femininos.", badge: "Ao Vivo" },
   { name: "SporTV", type: "TV Fechada", details: "Transmite principais jogos da Série A, Série B, Copa do Brasil e Feminino.", badge: "Canais Globo" },
-  { name: "TV Globo", type: "TV Aberta", details: "Partidas selecionadas das quartas e domingos às 16h.", badge: "Gratuito" },
-  { name: "Disney+ / ESPN", type: "Streaming & TV Fechada", details: "Premier League, La Liga, Serie A Italiana e Copa Libertadores.", badge: "Internacional" },
-  { name: "Max (HBO Max)", type: "Streaming", details: "Transmissão exclusiva da UEFA Champions League e Paulistão.", badge: "Champions" }
+  { name: "TV Globo", type: "TV Aberta", details: "Partidas selecionadas das quartas e domingos às 16h.", badge: "Gratuito" }
 ];
 
-// Partidas Extras (Amanhã, Hoje, Próximos Dias)
 const TODAY_DATE = new Date().toISOString().split('T')[0];
 const EXTRA_MATCHES = [
   {
@@ -110,170 +92,8 @@ const EXTRA_MATCHES = [
     awayTeam: { name: "Operário-PR", shortName: "Operário", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/321853.png" },
     venue: "Vila Belmiro",
     broadcaster: "Premiere / SporTV"
-  },
-  {
-    id: 9003,
-    utcDate: new Date("2026-09-29T19:00:00Z").toISOString(),
-    status: "TIMED",
-    stage: "Reta Final",
-    categoryTag: "Feminino • Profissional",
-    competition: { name: "Brasileirão Feminino" },
-    homeTeam: { name: "Corinthians (Fem)", shortName: "Corinthians Fem", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10272.png" },
-    awayTeam: { name: "Palmeiras (Fem)", shortName: "Palmeiras Fem", crest: "https://images.fotmob.com/image_resources/logo/teamlogo/10283.png" },
-    venue: "Neo Química Arena",
-    broadcaster: "SporTV / TV Brasil"
   }
 ];
-
-// Banco de Notícias Completo (Mapeado exatamente para o nome de CADA um dos 12 times)
-const NEWS_BY_TEAM = {
-  "Destaques": [
-    { 
-      id: 101, 
-      team: "Geral", 
-      title: "Guia completo de transmissões: Onde assistir aos jogos da rodada no futebol brasileiro", 
-      summary: "Confira horários e canais de TV fechada, aberta e streaming dos confrontos desta semana.", 
-      date: "28/09/2026", 
-      content: "O futebol brasileiro entra em uma de suas semanas mais decisivas na temporada de 2026. Com duelos fundamentais no Brasileirão Série A, Série B e nos campeonatos femininos, o torcedor precisa ficar atento às opções de transmissão.\n\nA TV Globo transmitirá os jogos selecionados das noites de quarta-feira e tardes de domingo. Nos canais fechados, a SporTV e a ESPN lideram a grade de programação, enquanto o Premiere assegura 100% dos confrontos das Séries A e B no Pay-Per-View.\n\nPara quem prefere o streaming, plataformas como CazéTV, Max e Disney+ oferecem transmissões em alta definição com narrações exclusivas e análises de pré-jogo."
-    },
-    { 
-      id: 102, 
-      team: "Seleção Brasileira", 
-      title: "Brasil x Austrália: Horários, prováveis escalações e onde assistir ao vivo", 
-      summary: "Seleção entra em campo nesta segunda em preparação para os próximos desafios internacionais.", 
-      date: "28/09/2026", 
-      content: "A Seleção Brasileira masculina volta a campo nesta segunda-feira para enfrentar a Austrália em partida amistosa preparatória.\n\nO técnico da Seleção testará novas opções no setor de meio-campo e ataque, dando rodagem a jovens destaques do futebol nacional e europeu. A partida terá início às 18:30 (horário de Brasília) e contará com transmissão ao vivo na TV Globo e no SporTV."
-    },
-    { 
-      id: 103, 
-      team: "Feminino", 
-      title: "Derby no Brasileirão Feminino mobiliza Corinthians e Palmeiras em fase decisiva", 
-      summary: "Clássico paulista agita a reta final do campeonato nacional com cobertura completa de TV.", 
-      date: "27/09/2026", 
-      content: "As equipes femininas de Corinthians e Palmeiras se preparam para mais um Derby épico pelo Brasileirão Feminino.\n\nCom as duas equipes no topo da tabela e com vaga garantida nas fases finais, a partida vale a liderança isolada e o favoritismo para o título nacional. O jogo terá transmissão do SporTV e da TV Brasil."
-    }
-  ],
-  "Flamengo": [
-    { 
-      id: 201, 
-      team: "Flamengo", 
-      title: "Flamengo intensifica treinos táticos no Ninho do Urubu visando o próximo duelo", 
-      summary: "Comandante ajusta o posicionamento ofensivo e busca manter o time no topo da tabela do Brasileirão.", 
-      date: "28/09/2026", 
-      content: "O elenco do Flamengo realizou mais uma sessão intensa de treinos no Ninho do Urubu sob o comando da comissão técnica. O foco do trabalho esteve na rápida transição ofensiva e no aprimoramento das finalizações.\n\nCom o apoio da torcida no Maracanã no próximo compromisso, a equipe busca somar três pontos para se manter firme na disputa do título do Brasileirão 2026."
-    }
-  ],
-  "Palmeiras": [
-    { 
-      id: 301, 
-      team: "Palmeiras", 
-      title: "Palmeiras foca em bola parada no Allianz Parque para manter sequência positiva", 
-      summary: "Equipe alviverde finaliza preparação com atenção especial aos detalhes defensivos e táticos.", 
-      date: "28/09/2026", 
-      content: "Na Academia de Futebol, o Palmeiras realizou ajustes decisivos nas jogadas ensaiadas de bola parada antes do próximo confronto pelo campeonato.\n\nA equipe alviverde vive grande momento na temporada e busca manter o aproveitamento elevado jogando no Allianz Parque."
-    }
-  ],
-  "São Paulo": [
-    { 
-      id: 401, 
-      team: "São Paulo", 
-      title: "São Paulo ajusta escalação no MorrumBIS visando entrar forte no G-4 do Brasileirão", 
-      summary: "Comissão técnica ajusta posicionamento do meio-campo para dar maior ritmo ao ataque são-paulino.", 
-      date: "28/09/2026", 
-      content: "O São Paulo finalizou a preparação tática no CT da Barra Funda para a próxima rodada. O técnico tricolor testou opções ofensivas visando furar o bloqueio do adversário no MorrumBIS.\n\nA torcida promete grande presença nas arquibancadas para embalar o Tricolor rumo às vagas diretas da Libertadores."
-    }
-  ],
-  "Corinthians": [
-    { 
-      id: 501, 
-      team: "Corinthians", 
-      title: "Corinthians intensifica treinos na Neo Química Arena focado na reabilitação na tabela", 
-      summary: "Fiel torcida prepara grande recepção enquanto o elenco faz acertos táticos no gramado.", 
-      date: "28/09/2026", 
-      content: "O Corinthians realizou o último treino antes de entrar em campo na Neo Química Arena. A comissão técnica enfatizou a marcação sob pressão e o aproveitamento das chances em velocidade.\n\nO Timão busca engrenar uma sequência de vitórias em casa para se distanciar da parte inferior da tabela de classificação."
-    }
-  ],
-  "Santos": [
-    { 
-      id: 601, 
-      team: "Santos", 
-      title: "Santos busca consolidar o topo da Série B em noite decisiva na Vila Belmiro", 
-      summary: "Peixe joga em casa diante da sua torcida para dar passo fundamental rumo ao acesso.", 
-      date: "28/09/2026", 
-      content: "A Vila Belmiro será palco de mais uma batalha decisiva para o Santos no Campeonato Brasileiro Série B.\n\nCom ingressos praticamente esgotados, o Peixe confia no talento de seus atacantes e na força das arquibancadas para conquistar três pontos e manter a liderança da competição."
-    }
-  ],
-  "Fluminense": [
-    { 
-      id: 701, 
-      team: "Fluminense", 
-      title: "Fluminense trabalha jogadas de articulação no CT Carlos Castilho", 
-      summary: "Tricolor das Laranjeiras busca pontuar no próximo jogo para subir posições na classificação.", 
-      date: "28/09/2026", 
-      content: "O Fluminense concluiu os trabalhos táticos antes de encarar o próximo duelo da temporada. O grupo focou em trocas de passes rápidas e finalizações de média distância.\n\nA equipe carioca aposta na experiência de seus líderes para comandar o time rumo ao resultado positivo."
-    }
-  ],
-  "Vasco da Gama": [
-    { 
-      id: 801, 
-      team: "Vasco da Gama", 
-      title: "Vasco mobiliza torcida em São Januário para confronto importantíssimo", 
-      summary: "Cruzmaltino busca fazer valer o mando de campo para assegurar vaga nos torneios continentais.", 
-      date: "28/09/2026", 
-      content: "O Vasco da Gama encerrou sua preparação em São Januário para a próxima rodada. O ambiente na Colina Histórica é de confiança e apoio irrestrito ao time.\n\nCom a estratégia definida pelo treinador, o Vasco entra em campo focado em garantir a vitória perante o seu torcedor."
-    }
-  ],
-  "Botafogo": [
-    { 
-      id: 901, 
-      team: "Botafogo", 
-      title: "Líder Botafogo treina movimentação no Nilton Santos com foco no título", 
-      summary: "Glorioso busca manter a regularidade no topo com apoio total da torcida alvinegra.", 
-      date: "28/09/2026", 
-      content: "O Botafogo segue firme na liderança do campeonato e ajustou os últimos detalhes no gramado do Nilton Santos.\n\nA comissão técnica cobra intensidade máxima desde os primeiros minutos para impor o ritmo de jogo e garantir mais três pontos na busca pela taça."
-    }
-  ],
-  "Grêmio": [
-    { 
-      id: 1001, 
-      team: "Grêmio", 
-      title: "Grêmio treina saída rápida de bola no CT Luiz Carvalho antes de clássico em casa", 
-      summary: "Tricolor gaúcho quer impor intensidade jogando na Arena do Grêmio.", 
-      date: "28/09/2026", 
-      content: "O Grêmio finalizou as atividades táticas visando seu próximo compromisso pelo Brasileirão. A comissão técnica promoveu treinos de bola parada e transição ofensiva.\n\nA torcida gremista promete encher a Arena para empurrar o time em busca de posições mais elevadas na tabela."
-    }
-  ],
-  "Internacional": [
-    { 
-      id: 1101, 
-      team: "Internacional", 
-      title: "Internacional foca em compactação defensiva no Beira-Rio para buscar a vitória", 
-      summary: "Colorado busca somar três pontos diante de sua torcida para se aproximar do G-6.", 
-      date: "28/09/2026", 
-      content: "No CT Parque Gigante, o Internacional concluiu a preparação para o desafio desta semana. O técnico colorado priorizou ajustes no posicionamento sem a bola e triangulações nos lados do campo.\n\nO Beira-Rio terá grande presença de público para empurrar a equipe gaúcha."
-    }
-  ],
-  "Atlético Mineiro": [
-    { 
-      id: 1201, 
-      team: "Atlético Mineiro", 
-      title: "Atlético-MG se prepara na Arena MRV para mais um grande duelo pelo campeonato", 
-      summary: "Galo busca impor seu ritmo de jogo com casa cheia em Belo Horizonte.", 
-      date: "28/09/2026", 
-      content: "O Atlético-MG finalizou a preparação física e tática na Arena MRV. O Galo almeja manter a invencibilidade em seu novo estádio e somar pontos preciosos na reta decisiva da temporada."
-    }
-  ],
-  "Cruzeiro": [
-    { 
-      id: 1301, 
-      team: "Cruzeiro", 
-      title: "Cruzeiro faz ajustes finais na Toca da Raposa focado em somar 3 pontos no Mineirão", 
-      summary: "Raposa trabalha movimentação ofensiva e busca aproximação dos líderes.", 
-      date: "28/09/2026", 
-      content: "O Cruzeiro encerrou os preparativos na Toca da Raposa 2 antes de encarar seu próximo adversário no Gigante da Pampulha.\n\nA Nação Azul promete lotar o Mineirão para empurrar a equipe em busca de mais uma vitória decisiva na temporada."
-    }
-  ]
-};
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('matches');
@@ -283,10 +103,14 @@ export default function App() {
   const [selectedLeague, setSelectedLeague] = useState('todas');
   const [selectedStandingLeague, setSelectedStandingLeague] = useState('Brasileirão Série A');
   const [selectedTeamFilter, setSelectedTeamFilter] = useState(null);
-  const [selectedNewsTeam, setSelectedNewsTeam] = useState('Destaques');
-  const [selectedArticle, setSelectedArticle] = useState(null);
+  const [selectedNewsTeam, setSelectedNewsTeam] = useState('Seleção Brasileira');
   const [dateFilter, setDateFilter] = useState('todos');
 
+  // Estados para as Notícias Automáticas via RSS (Google News)
+  const [rssNews, setRssNews] = useState([]);
+  const [newsLoading, setNewsLoading] = useState(true);
+
+  // Busca Partidas em Tempo Real
   const fetchMatches = async () => {
     setLoading(true);
     try {
@@ -308,9 +132,36 @@ export default function App() {
     }
   };
 
+  // Busca Notícias Automáticas em Tempo Real do Google News RSS
+  const fetchRssNews = (searchTerm) => {
+    setNewsLoading(true);
+    const query = encodeURIComponent(searchTerm === 'Destaques' ? 'Futebol Brasileiro' : searchTerm);
+    const rssUrl = `https://news.google.com/rss/search?q=${query}&hl=pt-BR&gl=BR&ceid=BR:pt-BR`;
+    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
+    fetch(apiUrl)
+      .then(res => res.json())
+      .then(data => {
+        if (data.items) {
+          setRssNews(data.items.slice(0, 6)); // Pega as 6 notícias mais recentes
+        } else {
+          setRssNews([]);
+        }
+        setNewsLoading(false);
+      })
+      .catch(err => {
+        console.error("Erro ao carregar RSS:", err);
+        setNewsLoading(false);
+      });
+  };
+
   useEffect(() => {
     fetchMatches();
   }, []);
+
+  useEffect(() => {
+    fetchRssNews(selectedNewsTeam);
+  }, [selectedNewsTeam]);
 
   const leagues = ['todas', ...Array.from(new Set(matches.map(m => m.competition?.name).filter(Boolean)))];
 
@@ -329,7 +180,6 @@ export default function App() {
     const matchesLeague = selectedLeague === 'todas' || leagueName === selectedLeague;
     const matchesTeamFilter = !selectedTeamFilter || homeName.toLowerCase().includes(selectedTeamFilter.toLowerCase()) || awayName.toLowerCase().includes(selectedTeamFilter.toLowerCase());
 
-    // Filtro rápido por Data
     const matchDateStr = new Date(match.utcDate).toISOString().split('T')[0];
     let matchesDate = true;
     if (dateFilter === 'hoje') matchesDate = matchDateStr === TODAY_DATE;
@@ -337,11 +187,9 @@ export default function App() {
     return matchesSearch && matchesLeague && matchesTeamFilter && matchesDate;
   });
 
-  const newsList = NEWS_BY_TEAM[selectedNewsTeam] || NEWS_BY_TEAM["Destaques"];
-
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-12 selection:bg-emerald-500 selection:text-slate-950">
-      {/* Header com Navegação */}
+      {/* Header */}
       <header className="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center space-x-3">
@@ -356,7 +204,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Abas de Navegação Principal */}
           <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800/80 overflow-x-auto scrollbar-none">
             <button
               onClick={() => setActiveTab('matches')}
@@ -404,22 +251,22 @@ export default function App() {
 
       <main className="max-w-4xl mx-auto px-4 pt-6 space-y-8">
         
-        {/* Carrossel de Times em Destaque */}
+        {/* Carrossel com Escudo da Seleção + Clubes */}
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span className="font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-              <Shield className="w-4 h-4 text-emerald-400" /> Times em Destaque (Filtrar Conteúdo)
+              <Shield className="w-4 h-4 text-emerald-400" /> Times & Seleção (Filtrar Jogos & Notícias)
             </span>
-            {(selectedTeamFilter || selectedNewsTeam !== 'Destaques') && (
+            {(selectedTeamFilter || selectedNewsTeam !== 'Seleção Brasileira') && (
               <button 
                 onClick={() => {
                   setSelectedTeamFilter(null);
-                  setSelectedNewsTeam('Destaques');
+                  setSelectedNewsTeam('Seleção Brasileira');
                   setSearchQuery('');
                 }}
                 className="text-emerald-400 hover:underline font-semibold"
               >
-                Limpar filtros
+                Resetar filtro
               </button>
             )}
           </div>
@@ -430,7 +277,7 @@ export default function App() {
                 onClick={() => {
                   if (selectedTeamFilter === team.name) {
                     setSelectedTeamFilter(null);
-                    setSelectedNewsTeam('Destaques');
+                    setSelectedNewsTeam('Seleção Brasileira');
                     setSearchQuery('');
                   } else {
                     setSelectedTeamFilter(team.name);
@@ -470,7 +317,6 @@ export default function App() {
                   />
                 </div>
 
-                {/* Filtro Rápido por Data */}
                 <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 p-1 rounded-xl text-xs font-semibold">
                   <button 
                     onClick={() => setDateFilter('todos')} 
@@ -589,7 +435,6 @@ export default function App() {
                           </div>
                         </div>
 
-                        {/* Localização e Transmissão */}
                         <div className="pt-2 border-t border-slate-800/40 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
                           <div className="flex items-center gap-1.5">
                             <MapPin className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
@@ -601,7 +446,6 @@ export default function App() {
                           </div>
                         </div>
 
-                        {/* Aviso sobre os requisitos de streaming */}
                         <div className="pt-2 border-t border-slate-800/20 flex items-center gap-1.5 text-[11px] text-slate-400 italic">
                           <Info className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
                           <span>Os requisitos de acesso podem variar de acordo com o serviço de streaming.</span>
@@ -616,7 +460,7 @@ export default function App() {
           </div>
         )}
 
-        {/* ABA 2: TABELA DE CLASSIFICAÇÃO COM BARRAS LATERAIS */}
+        {/* ABA 2: TABELA DE CLASSIFICAÇÃO */}
         {activeTab === 'standings' && (
           <div className="space-y-6">
             <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs scrollbar-thin">
@@ -700,11 +544,10 @@ export default function App() {
                 </table>
               </div>
 
-              {/* Legenda Explicativa de Cores */}
               <div className="p-3.5 bg-slate-950/80 border-t border-slate-800 flex flex-wrap items-center gap-4 text-[11px] font-medium text-slate-300">
-                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-emerald-500"></span> Libertadores / Champions / G4</span>
-                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-blue-500"></span> Pré-Libertadores / Qualificação</span>
-                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-amber-500"></span> Sul-Americana / Liga Europa</span>
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-emerald-500"></span> Libertadores / G4</span>
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-blue-500"></span> Pré-Libertadores</span>
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-amber-500"></span> Sul-Americana</span>
                 <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-red-500"></span> Rebaixamento (Z4)</span>
               </div>
             </div>
@@ -766,14 +609,14 @@ export default function App() {
           </div>
         )}
 
-        {/* Seção Dinâmica de Notícias com Leitura Interna Completa */}
+        {/* SEÇÃO DE NOTÍCIAS AUTOMÁTICAS EM TEMPO REAL VIA RSS */}
         <section className="space-y-4 pt-6 border-t border-slate-800">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-              <Newspaper className="w-4 h-4 text-emerald-400" /> NOTÍCIAS & GUIAS POR CLUBE ({selectedNewsTeam})
+              <Newspaper className="w-4 h-4 text-emerald-400" /> NOTÍCIAS EM TEMPO REAL ({selectedNewsTeam})
             </h2>
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs scrollbar-thin">
-              {['Destaques', ...BRASIL_TEAMS.map(t => t.name)].map(tName => (
+              {['Seleção Brasileira', 'Flamengo', 'Palmeiras', 'São Paulo', 'Corinthians', 'Santos', 'Fluminense', 'Vasco da Gama', 'Botafogo', 'Grêmio', 'Internacional', 'Atlético Mineiro', 'Cruzeiro'].map(tName => (
                 <button
                   key={tName}
                   onClick={() => setSelectedNewsTeam(tName)}
@@ -789,76 +632,50 @@ export default function App() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {newsList.map(item => (
-              <div 
-                key={item.id} 
-                onClick={() => setSelectedArticle(item)}
-                className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between hover:border-emerald-500/50 transition cursor-pointer group"
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-[11px] text-slate-400">
-                    <span className="bg-slate-800 text-emerald-400 px-2 py-0.5 rounded-full font-semibold">{item.team}</span>
-                    <span>{item.date}</span>
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-100 group-hover:text-emerald-400 transition leading-snug">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-slate-400 line-clamp-3">
-                    {item.summary}
-                  </p>
+          {newsLoading ? (
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">
+              <RefreshCw className="w-5 h-5 text-emerald-400 animate-spin mx-auto mb-2" />
+              Buscando últimas notícias da {selectedNewsTeam}...
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {rssNews.length === 0 ? (
+                <div className="col-span-3 bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">
+                  Nenhuma notícia recente encontrada para este time agora.
                 </div>
+              ) : (
+                rssNews.map((item, index) => (
+                  <a 
+                    key={index} 
+                    href={item.link} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between hover:border-emerald-500/50 transition group"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-[11px] text-slate-400">
+                        <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-semibold">
+                          {selectedNewsTeam}
+                        </span>
+                        <span>{new Date(item.pubDate).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                      <h3 className="text-sm font-bold text-slate-100 group-hover:text-emerald-400 transition leading-snug">
+                        {item.title}
+                      </h3>
+                    </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs font-semibold text-emerald-400">
-                  <span>Ler matéria completa</span>
-                  <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition" />
-                </div>
-              </div>
-            ))}
-          </div>
+                    <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs font-semibold text-emerald-400">
+                      <span>Ler no portal de origem</span>
+                      <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
+                    </div>
+                  </a>
+                ))
+              )}
+            </div>
+          )}
         </section>
 
       </main>
-
-      {/* Modal de Leitura de Notícia Completa */}
-      {selectedArticle && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-2xl relative">
-            <button 
-              onClick={() => setSelectedArticle(null)}
-              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white bg-slate-800 rounded-full transition"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="space-y-2">
-              <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded text-xs font-bold">
-                {selectedArticle.team}
-              </span>
-              <h2 className="text-xl font-black text-white leading-snug pt-1">
-                {selectedArticle.title}
-              </h2>
-              <p className="text-xs text-slate-400">Publicado em {selectedArticle.date} • Onde Tem Jogo</p>
-            </div>
-
-            <hr className="border-slate-800" />
-
-            <div className="text-sm text-slate-300 leading-relaxed whitespace-pre-line space-y-3">
-              {selectedArticle.content}
-            </div>
-
-            <div className="pt-4 border-t border-slate-800 flex justify-end">
-              <button 
-                onClick={() => setSelectedArticle(null)}
-                className="bg-emerald-500 text-slate-950 px-4 py-2 rounded-xl font-bold text-xs hover:bg-emerald-400 transition"
-              >
-                Fechar Notícia
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }
