@@ -1,1301 +1,1801 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Tv,
-  Calendar,
-  Search,
-  Trophy,
-  RefreshCw,
-  AlertCircle,
-  Newspaper,
+  CalendarDays,
+  ChevronDown,
+  ChevronRight,
+  Clock3,
   ExternalLink,
   MapPin,
-  Shield,
-  ListOrdered,
-  Info,
+  PlayCircle,
+  Radio,
+  Search,
+  Trophy,
+  Tv,
+  Users,
   X,
-  Flame,
-  Star,
-  ChevronRight,
-  Clock,
+  RefreshCw,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 
-/*
-  ============================================================
-  ONDE TEM JOGO?
-  Frontend MVP
+/* =========================================================
+   CONFIGURAÇÃO
+========================================================= */
 
-  Dados reais:
-  - O frontend tenta buscar /api/matches
-  - Caso a API não esteja disponível, mostra uma mensagem
-    de erro em vez de inventar dados.
+const API_BASE = import.meta.env.VITE_API_URL || "";
 
-  IMPORTANTE:
-  - Não coloque chaves privadas de APIs neste arquivo.
-  - A integração com a API de futebol deve ficar no backend.
-  ============================================================
-*/
-
-/* ============================================================
-   CONFIGURAÇÕES
-   ============================================================ */
-
-const API_ENDPOINT = "/api/matches";
+const MATCHES_ENDPOINT = `${API_BASE}/api/matches`;
+const TEAMS_ENDPOINT = `${API_BASE}/api/teams`;
+const NEWS_ENDPOINT = `${API_BASE}/api/news`;
 
 const BRAZIL_TIMEZONE = "America/Sao_Paulo";
 
-/* ============================================================
-   TIMES POPULARES
-   ============================================================ */
+const REFRESH_INTERVAL = 5 * 60 * 1000;
 
-const POPULAR_TEAMS = [
-  {
-    id: 8256,
-    name: "Seleção Brasileira",
-    shortName: "Brasil",
-    state: "CBF",
-    crest:
-      "https://images.fotmob.com/image_resources/logo/teamlogo/8256.png",
-    stadium: "Maracanã",
-  },
-  {
-    id: 5926,
-    name: "Flamengo",
-    shortName: "Flamengo",
-    state: "RJ",
-    crest:
-      "https://images.fotmob.com/image_resources/logo/teamlogo/5926.png",
-    stadium: "Maracanã",
-  },
-  {
-    id: 10283,
-    name: "Palmeiras",
-    shortName: "Palmeiras",
-    state: "SP",
-    crest:
-      "https://images.fotmob.com/image_resources/logo/teamlogo/10283.png",
-    stadium: "Allianz Parque",
-  },
-  {
-    id: 10277,
-    name: "São Paulo",
-    shortName: "São Paulo",
-    state: "SP",
-    crest:
-      "https://images.fotmob.com/image_resources/logo/teamlogo/10277.png",
-    stadium: "MorumBIS",
-  },
-  {
-    id: 10272,
-    name: "Corinthians",
-    shortName: "Corinthians",
-    state: "SP",
-    crest:
-      "https://images.fotmob.com/image_resources/logo/teamlogo/10272.png",
-    stadium: "Neo Química Arena",
-  },
-  {
-    id: 10276,
-    name: "Santos",
-    shortName: "Santos",
-    state: "SP",
-    crest:
-      "https://images.fotmob.com/image_resources/logo/teamlogo/10276.png",
-    stadium: "Vila Belmiro",
-  },
-  {
-    id: 10274,
-    name: "Fluminense",
-    shortName: "Fluminense",
-    state: "RJ",
-    crest:
-      "https://images.fotmob.com/image_resources/logo/teamlogo/10274.png",
-    stadium: "Maracanã",
-  },
-  {
-    id: 10278,
-    name: "Vasco da Gama",
-    shortName: "Vasco",
-    state: "RJ",
-    crest:
-      "https://images.fotmob.com/image_resources/logo/teamlogo/10278.png",
-    stadium: "São Januário",
-  },
-  {
-    id: 8517,
-    name: "Botafogo",
-    shortName: "Botafogo",
-    state: "RJ",
-    crest:
-      "https://images.fotmob.com/image_resources/logo/teamlogo/8517.png",
-    stadium: "Nilton Santos",
-  },
-  {
-    id: 10275,
-    name: "Grêmio",
-    shortName: "Grêmio",
-    state: "RS",
-    crest:
-      "https://images.fotmob.com/image_resources/logo/teamlogo/10275.png",
-    stadium: "Arena do Grêmio",
-  },
-  {
-    id: 8632,
-    name: "Internacional",
-    shortName: "Inter",
-    state: "RS",
-    crest:
-      "https://images.fotmob.com/image_resources/logo/teamlogo/8632.png",
-    stadium: "Beira-Rio",
-  },
-  {
-    id: 10273,
-    name: "Atlético Mineiro",
-    shortName: "Atlético-MG",
-    state: "MG",
-    crest:
-      "https://images.fotmob.com/image_resources/logo/teamlogo/10273.png",
-    stadium: "Arena MRV",
-  },
-  {
-    id: 9782,
-    name: "Cruzeiro",
-    shortName: "Cruzeiro",
-    state: "MG",
-    crest:
-      "https://images.fotmob.com/image_resources/logo/teamlogo/9782.png",
-    stadium: "Mineirão",
-  },
-];
+/* =========================================================
+   FUNÇÕES DE DATA
+========================================================= */
 
-/* ============================================================
-   NOTÍCIAS
-   ============================================================ */
-
-const NEWS_TEAMS = [
-  "Futebol Brasileiro",
-  "Flamengo",
-  "Palmeiras",
-  "Corinthians",
-  "São Paulo",
-  "Santos",
-  "Fluminense",
-  "Vasco da Gama",
-  "Botafogo",
-  "Grêmio",
-  "Internacional",
-  "Atlético Mineiro",
-  "Cruzeiro",
-];
-
-/* ============================================================
-   FUNÇÕES AUXILIARES
-   ============================================================ */
-
-function formatBrazilDate(date) {
-  if (!date) return "-";
-
-  return new Intl.DateTimeFormat("pt-BR", {
+function getBrazilDateString(date = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", {
     timeZone: BRAZIL_TIMEZONE,
-    day: "2-digit",
-    month: "2-digit",
     year: "numeric",
-  }).format(new Date(date));
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
 }
 
-function formatBrazilTime(date) {
-  if (!date) return "-";
+function formatTime(dateString) {
+  if (!dateString) return "--:--";
+
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) return "--:--";
 
   return new Intl.DateTimeFormat("pt-BR", {
     timeZone: BRAZIL_TIMEZONE,
     hour: "2-digit",
     minute: "2-digit",
-  }).format(new Date(date));
+  }).format(date);
 }
 
-function getBrazilDateKey(date) {
-  if (!date) return "";
+function formatDate(dateString) {
+  if (!dateString) return "";
 
-  const parts = new Intl.DateTimeFormat("en-CA", {
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("pt-BR", {
     timeZone: BRAZIL_TIMEZONE,
-    year: "numeric",
-    month: "2-digit",
+    weekday: "short",
     day: "2-digit",
-  }).formatToParts(new Date(date));
-
-  const year = parts.find((p) => p.type === "year")?.value;
-  const month = parts.find((p) => p.type === "month")?.value;
-  const day = parts.find((p) => p.type === "day")?.value;
-
-  return `${year}-${month}-${day}`;
+    month: "2-digit",
+  })
+    .format(date)
+    .replace(".", "");
 }
 
-function getTodayBrazilKey() {
-  return getBrazilDateKey(new Date());
+function getDateKey(dateString) {
+  if (!dateString) return "";
+
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) return "";
+
+  return getBrazilDateString(date);
 }
 
-function isLive(status) {
-  return ["IN_PLAY", "PAUSED", "LIVE"].includes(status);
+function addDays(dateString, days) {
+  const date = new Date(`${dateString}T12:00:00`);
+
+  if (Number.isNaN(date.getTime())) return dateString;
+
+  date.setDate(date.getDate() + days);
+
+  return getBrazilDateString(date);
 }
 
-function getMatchStatusLabel(status) {
-  if (status === "IN_PLAY" || status === "LIVE") return "AO VIVO";
-  if (status === "PAUSED") return "INTERVALO";
-  if (status === "FINISHED") return "ENCERRADO";
-  if (status === "POSTPONED") return "ADIADO";
-  if (status === "CANCELLED") return "CANCELADO";
+/* =========================================================
+   TEXTO / NORMALIZAÇÃO
+========================================================= */
 
-  return null;
+function normalizeText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 }
 
-/* ============================================================
-   APP
-   ============================================================ */
+function firstValid(...values) {
+  return values.find(
+    (value) =>
+      value !== undefined &&
+      value !== null &&
+      String(value).trim() !== ""
+  );
+}
 
-export default function App() {
-  const [activeTab, setActiveTab] = useState("matches");
+/* =========================================================
+   ESCUDOS
+========================================================= */
 
-  const [matches, setMatches] = useState([]);
+function getTeamLogo(team) {
+  if (!team) return "";
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  return firstValid(
+    team.logo,
+    team.crest,
+    team.badge,
+    team.image,
+    team.emblem,
+    team.logoUrl
+  );
+}
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedLeague, setSelectedLeague] = useState("todas");
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const [dateFilter, setDateFilter] = useState("hoje");
+function getTeamName(team) {
+  if (!team) return "Time";
 
-  const [favoriteTeams, setFavoriteTeams] = useState(() => {
-    try {
-      return JSON.parse(
-        localStorage.getItem("onde-tem-jogo-favorites") || "[]"
-      );
-    } catch {
-      return [];
+  return firstValid(
+    team.name,
+    team.shortName,
+    team.short_name,
+    team.teamName,
+    "Time"
+  );
+}
+
+function getTeamId(team) {
+  if (!team) return null;
+
+  return firstValid(
+    team.id,
+    team.teamId,
+    team.team_id
+  );
+}
+
+/* =========================================================
+   TRANSMISSÕES
+========================================================= */
+
+function normalizeBroadcasters(match) {
+  const result = [];
+
+  const addBroadcaster = (item) => {
+    if (!item) return;
+
+    if (typeof item === "string") {
+      const name = item.trim();
+
+      if (name && !result.some((x) => normalizeText(x.name) === normalizeText(name))) {
+        result.push({
+          name,
+          type: "tv",
+          url: null,
+        });
+      }
+
+      return;
     }
-  });
 
-  const [selectedNewsTeam, setSelectedNewsTeam] =
-    useState("Futebol Brasileiro");
+    if (typeof item === "object") {
+      const name = firstValid(
+        item.name,
+        item.provider,
+        item.channel,
+        item.broadcast,
+        item.broadcaster,
+        item.title
+      );
 
-  const [rssNews, setRssNews] = useState([]);
-  const [newsLoading, setNewsLoading] = useState(false);
+      if (!name) return;
 
-  /* ==========================================================
-     FAVORITOS
-     ========================================================== */
+      const normalizedName = normalizeText(name);
 
-  useEffect(() => {
-    localStorage.setItem(
-      "onde-tem-jogo-favorites",
-      JSON.stringify(favoriteTeams)
+      if (!result.some((x) => normalizeText(x.name) === normalizedName)) {
+        result.push({
+          name,
+          type: firstValid(item.type, item.kind, "tv"),
+          url: firstValid(item.url, item.link, item.href, null),
+        });
+      }
+    }
+  };
+
+  /* Estrutura já normalizada */
+  if (Array.isArray(match?.broadcasters)) {
+    match.broadcasters.forEach(addBroadcaster);
+  }
+
+  if (Array.isArray(match?.broadcasts)) {
+    match.broadcasts.forEach(addBroadcaster);
+  }
+
+  if (Array.isArray(match?.broadcast)) {
+    match.broadcast.forEach(addBroadcaster);
+  }
+
+  /* API-Football / estruturas parecidas */
+  if (Array.isArray(match?.fixture?.broadcasts)) {
+    match.fixture.broadcasts.forEach(addBroadcaster);
+  }
+
+  if (Array.isArray(match?.fixture?.broadcast)) {
+    match.fixture.broadcast.forEach(addBroadcaster);
+  }
+
+  /* Campo simples */
+  addBroadcaster(match?.broadcaster);
+  addBroadcaster(match?.broadcast);
+  addBroadcaster(match?.channel);
+  addBroadcaster(match?.tv);
+
+  /* Algumas APIs colocam isso em media */
+  if (Array.isArray(match?.media)) {
+    match.media.forEach(addBroadcaster);
+  }
+
+  return result;
+}
+
+/* =========================================================
+   ESTÁDIO / LOCAL
+========================================================= */
+
+function normalizeVenue(match) {
+  const venue =
+    match?.venue ||
+    match?.fixture?.venue ||
+    match?.stadium ||
+    match?.location ||
+    {};
+
+  if (typeof venue === "string") {
+    return {
+      name: venue,
+      city: "",
+      country: "",
+    };
+  }
+
+  return {
+    name: firstValid(
+      venue.name,
+      venue.stadium,
+      venue.venueName,
+      match?.stadiumName,
+      ""
+    ),
+    city: firstValid(
+      venue.city,
+      venue.location,
+      venue.municipality,
+      match?.city,
+      ""
+    ),
+    country: firstValid(
+      venue.country,
+      match?.country,
+      ""
+    ),
+  };
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+function normalizeStatus(match) {
+  const status =
+    match?.status ||
+    match?.fixture?.status ||
+    {};
+
+  if (typeof status === "string") {
+    return {
+      short: status,
+      long: status,
+    };
+  }
+
+  return {
+    short: firstValid(
+      status.short,
+      status.code,
+      match?.statusShort,
+      ""
+    ),
+    long: firstValid(
+      status.long,
+      match?.statusLong,
+      ""
+    ),
+  };
+}
+
+function isFinishedStatus(status) {
+  const value = normalizeText(
+    typeof status === "string"
+      ? status
+      : `${status?.short || ""} ${status?.long || ""}`
+  );
+
+  return [
+    "ft",
+    "aet",
+    "pen",
+    "finished",
+    "finalizado",
+    "encerrado",
+  ].some((x) => value.includes(x));
+}
+
+function isLiveStatus(status) {
+  const value = normalizeText(
+    typeof status === "string"
+      ? status
+      : `${status?.short || ""} ${status?.long || ""}`
+  );
+
+  return [
+    "live",
+    "1h",
+    "2h",
+    "ht",
+    "et",
+    "p",
+    "q1",
+    "q2",
+    "q3",
+    "q4",
+  ].includes(value);
+}
+
+/* =========================================================
+   NORMALIZAÇÃO DA PARTIDA
+========================================================= */
+
+function normalizeMatch(raw, index = 0) {
+  const homeRaw =
+    raw?.homeTeam ||
+    raw?.home ||
+    raw?.teams?.home ||
+    {};
+
+  const awayRaw =
+    raw?.awayTeam ||
+    raw?.away ||
+    raw?.teams?.away ||
+    {};
+
+  const leagueRaw =
+    raw?.league ||
+    {};
+
+  const date = firstValid(
+    raw?.date,
+    raw?.matchDate,
+    raw?.kickoff,
+    raw?.datetime,
+    raw?.fixture?.date,
+    null
+  );
+
+  const venue = normalizeVenue(raw);
+  const status = normalizeStatus(raw);
+  const broadcasters = normalizeBroadcasters(raw);
+
+  return {
+    id: firstValid(
+      raw?.id,
+      raw?.matchId,
+      raw?.fixture?.id,
+      `match-${index}-${date || "unknown"}`
+    ),
+
+    date,
+
+    homeTeam: {
+      id: getTeamId(homeRaw),
+      name: getTeamName(homeRaw),
+      logo: getTeamLogo(homeRaw),
+    },
+
+    awayTeam: {
+      id: getTeamId(awayRaw),
+      name: getTeamName(awayRaw),
+      logo: getTeamLogo(awayRaw),
+    },
+
+    league: {
+      id: firstValid(
+        leagueRaw?.id,
+        leagueRaw?.leagueId,
+        null
+      ),
+      name: firstValid(
+        leagueRaw?.name,
+        leagueRaw?.title,
+        raw?.competition,
+        "Competição"
+      ),
+      logo: firstValid(
+        leagueRaw?.logo,
+        leagueRaw?.crest,
+        ""
+      ),
+      country: firstValid(
+        leagueRaw?.country,
+        ""
+      ),
+    },
+
+    venue,
+
+    broadcasters,
+
+    status,
+
+    goals: {
+      home: firstValid(
+        raw?.goals?.home,
+        raw?.homeGoals,
+        raw?.score?.home,
+        null
+      ),
+      away: firstValid(
+        raw?.goals?.away,
+        raw?.awayGoals,
+        raw?.score?.away,
+        null
+      ),
+    },
+
+    round: firstValid(
+      raw?.round,
+      raw?.league?.round,
+      ""
+    ),
+
+    raw,
+  };
+}
+
+/* =========================================================
+   DADOS DEMONSTRATIVOS
+   SOMENTE PARA A INTERFACE NÃO FICAR VAZIA DURANTE O
+   DESENVOLVIMENTO.
+
+   NÃO SÃO APRESENTADOS COMO JOGOS REAIS.
+========================================================= */
+
+const DEMO_MATCHES = [
+  {
+    id: "demo-1",
+    date: `${getBrazilDateString()}T19:00:00-03:00`,
+    homeTeam: {
+      id: 1,
+      name: "Flamengo",
+      logo: "",
+    },
+    awayTeam: {
+      id: 2,
+      name: "Palmeiras",
+      logo: "",
+    },
+    league: {
+      id: 1,
+      name: "Brasileirão Série A",
+      logo: "",
+    },
+    venue: {
+      name: "Maracanã",
+      city: "Rio de Janeiro",
+      country: "Brasil",
+    },
+    broadcasters: [
+      {
+        name: "Premiere",
+        type: "tv",
+        url: null,
+      },
+    ],
+    status: {
+      short: "NS",
+      long: "Não iniciado",
+    },
+    goals: {
+      home: null,
+      away: null,
+    },
+  },
+];
+
+/* =========================================================
+   COMPONENTE: LOGO
+========================================================= */
+
+function TeamLogo({
+  team,
+  size = "w-10 h-10",
+}) {
+  const [error, setError] = useState(false);
+
+  const logo = getTeamLogo(team);
+  const name = getTeamName(team);
+
+  const initials = name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+
+  if (!logo || error) {
+    return (
+      <div
+        className={`${size} shrink-0 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-500`}
+        title={name}
+      >
+        {initials || "?"}
+      </div>
     );
-  }, [favoriteTeams]);
-
-  function toggleFavorite(teamName) {
-    setFavoriteTeams((current) => {
-      if (current.includes(teamName)) {
-        return current.filter((name) => name !== teamName);
-      }
-
-      return [...current, teamName];
-    });
   }
-
-  /* ==========================================================
-     BUSCAR JOGOS
-     ========================================================== */
-
-  async function fetchMatches() {
-    setLoading(true);
-    setError("");
-
-    try {
-      const response = await fetch(API_ENDPOINT, {
-        headers: {
-          Accept: "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erro HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      const receivedMatches = Array.isArray(data)
-        ? data
-        : Array.isArray(data.matches)
-        ? data.matches
-        : [];
-
-      setMatches(receivedMatches);
-    } catch (err) {
-      console.error("Erro ao buscar partidas:", err);
-
-      setMatches([]);
-
-      setError(
-        "Não foi possível atualizar os jogos agora. Verifique a conexão com a API."
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchMatches();
-
-    const interval = setInterval(() => {
-      fetchMatches();
-    }, 5 * 60 * 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  /* ==========================================================
-     NOTÍCIAS
-     ========================================================== */
-
-  async function fetchNews(team) {
-    setNewsLoading(true);
-
-    try {
-      const query = encodeURIComponent(team);
-
-      const rssUrl =
-        `https://news.google.com/rss/search?q=${query}` +
-        `&hl=pt-BR&gl=BR&ceid=BR:pt-BR`;
-
-      const response = await fetch(
-        `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(
-          rssUrl
-        )}`
-      );
-
-      if (!response.ok) {
-        throw new Error("Erro ao buscar notícias");
-      }
-
-      const data = await response.json();
-
-      setRssNews(Array.isArray(data.items) ? data.items.slice(0, 6) : []);
-    } catch (err) {
-      console.error("Erro nas notícias:", err);
-      setRssNews([]);
-    } finally {
-      setNewsLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchNews(selectedNewsTeam);
-  }, [selectedNewsTeam]);
-
-  /* ==========================================================
-     CAMPEONATOS DISPONÍVEIS
-     ========================================================== */
-
-  const leagues = useMemo(() => {
-    const names = matches
-      .map((match) => match.competition?.name)
-      .filter(Boolean);
-
-    return ["todas", ...Array.from(new Set(names))];
-  }, [matches]);
-
-  /* ==========================================================
-     FILTROS
-     ========================================================== */
-
-  const filteredMatches = useMemo(() => {
-    const search = searchQuery.trim().toLowerCase();
-
-    return matches
-      .filter((match) => {
-        const home = match.homeTeam?.name || "";
-        const away = match.awayTeam?.name || "";
-        const league = match.competition?.name || "";
-
-        const searchableText =
-          `${home} ${away} ${league} ${match.categoryTag || ""}`.toLowerCase();
-
-        const matchesSearch =
-          !search || searchableText.includes(search);
-
-        const matchesLeague =
-          selectedLeague === "todas" ||
-          league === selectedLeague;
-
-        const matchesTeam =
-          !selectedTeam ||
-          home.toLowerCase().includes(selectedTeam.toLowerCase()) ||
-          away.toLowerCase().includes(selectedTeam.toLowerCase());
-
-        const matchesDate =
-          dateFilter === "todos" ||
-          getBrazilDateKey(match.utcDate) === getTodayBrazilKey();
-
-        return (
-          matchesSearch &&
-          matchesLeague &&
-          matchesTeam &&
-          matchesDate
-        );
-      })
-      .sort(
-        (a, b) =>
-          new Date(a.utcDate).getTime() -
-          new Date(b.utcDate).getTime()
-      );
-  }, [
-    matches,
-    searchQuery,
-    selectedLeague,
-    selectedTeam,
-    dateFilter,
-  ]);
-
-  /* ==========================================================
-     TIMES FAVORITOS
-     ========================================================== */
-
-  const favoriteMatches = useMemo(() => {
-    if (!favoriteTeams.length) return [];
-
-    return matches.filter((match) => {
-      const home = match.homeTeam?.name || "";
-      const away = match.awayTeam?.name || "";
-
-      return favoriteTeams.some(
-        (team) =>
-          home.toLowerCase().includes(team.toLowerCase()) ||
-          away.toLowerCase().includes(team.toLowerCase())
-      );
-    });
-  }, [matches, favoriteTeams]);
-
-  /* ==========================================================
-     RESET
-     ========================================================== */
-
-  function resetFilters() {
-    setSelectedTeam(null);
-    setSelectedLeague("todas");
-    setSearchQuery("");
-    setDateFilter("hoje");
-  }
-
-  /* ==========================================================
-     RENDER
-     ========================================================== */
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
-      {/* HEADER */}
+    <img
+      src={logo}
+      alt={`Escudo do ${name}`}
+      className={`${size} shrink-0 object-contain`}
+      loading="lazy"
+      onError={() => setError(true)}
+    />
+  );
+}
 
-      <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/95 backdrop-blur">
-        <div className="max-w-6xl mx-auto px-4 py-3">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <button
-              onClick={() => {
-                setActiveTab("matches");
-                resetFilters();
-              }}
-              className="flex items-center gap-3 text-left"
+/* =========================================================
+   COMPONENTE: TRANSMISSÃO
+========================================================= */
+
+function BroadcasterList({ broadcasters }) {
+  if (!broadcasters?.length) {
+    return (
+      <span className="text-sm text-slate-400">
+        Transmissão ainda não informada
+      </span>
+    );
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {broadcasters.map((item, index) => {
+        const content = (
+          <span
+            key={`${item.name}-${index}`}
+            className="inline-flex items-center gap-1.5 rounded-full bg-red-50 border border-red-100 px-2.5 py-1 text-xs font-semibold text-red-700"
+          >
+            {item.type === "streaming" ? (
+              <PlayCircle className="w-3.5 h-3.5" />
+            ) : (
+              <Tv className="w-3.5 h-3.5" />
+            )}
+
+            {item.name}
+
+            {item.url && (
+              <ExternalLink className="w-3 h-3" />
+            )}
+          </span>
+        );
+
+        if (item.url) {
+          return (
+            <a
+              key={`${item.name}-${index}`}
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              <div className="bg-emerald-500 p-2.5 rounded-xl text-slate-950">
-                <Tv className="w-6 h-6" />
-              </div>
+              {content}
+            </a>
+          );
+        }
 
-              <div>
-                <h1 className="text-xl font-black tracking-tight">
-                  Onde tem Jogo?
-                </h1>
+        return content;
+      })}
+    </div>
+  );
+}
 
-                <p className="text-xs text-slate-400">
-                  Jogos, horários e onde assistir
-                </p>
-              </div>
-            </button>
+/* =========================================================
+   COMPONENTE: CARD DO JOGO
+========================================================= */
 
-            <nav className="flex gap-1 overflow-x-auto">
-              <NavButton
-                active={activeTab === "matches"}
-                onClick={() => setActiveTab("matches")}
-                icon={<Calendar className="w-4 h-4" />}
-              >
-                Jogos
-              </NavButton>
+function MatchCard({ match }) {
+  const finished = isFinishedStatus(match.status);
+  const live = isLiveStatus(match.status);
 
-              <NavButton
-                active={activeTab === "favorites"}
-                onClick={() => setActiveTab("favorites")}
-                icon={<Star className="w-4 h-4" />}
-              >
-                Meus times
-              </NavButton>
+  const homeScore = match.goals?.home;
+  const awayScore = match.goals?.away;
 
-              <NavButton
-                active={activeTab === "guide"}
-                onClick={() => setActiveTab("guide")}
-                icon={<Tv className="w-4 h-4" />}
-              >
-                Onde assistir
-              </NavButton>
+  const hasScore =
+    homeScore !== null &&
+    homeScore !== undefined &&
+    awayScore !== null &&
+    awayScore !== undefined;
 
-              <NavButton
-                active={activeTab === "news"}
-                onClick={() => setActiveTab("news")}
-                icon={<Newspaper className="w-4 h-4" />}
-              >
-                Notícias
-              </NavButton>
-            </nav>
-          </div>
+  return (
+    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-slate-300 transition">
+      {/* Cabeçalho */}
+      <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 min-w-0">
+          {match.league.logo ? (
+            <img
+              src={match.league.logo}
+              alt=""
+              className="w-5 h-5 object-contain"
+              loading="lazy"
+            />
+          ) : (
+            <Trophy className="w-4 h-4 text-slate-500" />
+          )}
+
+          <span className="text-xs font-semibold text-slate-600 truncate">
+            {match.league.name}
+          </span>
         </div>
-      </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6 space-y-8">
-        {/* ====================================================
-            TIMES POPULARES
-            ==================================================== */}
+        <div className="text-xs text-slate-400 whitespace-nowrap">
+          {formatDate(match.date)}
+        </div>
+      </div>
 
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-              <Shield className="w-4 h-4 text-emerald-400" />
-              Times populares
-            </h2>
+      <div className="p-5">
+        {/* Horário / status */}
+        <div className="flex justify-center mb-5">
+          {live ? (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold">
+              <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+              AO VIVO
+            </span>
+          ) : finished ? (
+            <span className="text-xs font-semibold text-slate-400">
+              ENCERRADO
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-700">
+              <Clock3 className="w-4 h-4" />
+              {formatTime(match.date)}
+            </span>
+          )}
+        </div>
 
-            {selectedTeam && (
-              <button
-                onClick={resetFilters}
-                className="text-xs text-emerald-400 hover:underline"
-              >
-                Limpar filtro
-              </button>
+        {/* Times */}
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+          {/* Mandante */}
+          <div className="flex flex-col items-center gap-2 min-w-0">
+            <TeamLogo
+              team={match.homeTeam}
+              size="w-14 h-14"
+            />
+
+            <span className="text-sm font-bold text-slate-800 text-center leading-tight">
+              {match.homeTeam.name}
+            </span>
+          </div>
+
+          {/* Placar */}
+          <div className="text-center">
+            {hasScore ? (
+              <div className="text-2xl font-black text-slate-900">
+                {homeScore}
+                <span className="mx-1 text-slate-300">x</span>
+                {awayScore}
+              </div>
+            ) : (
+              <div className="text-lg font-bold text-slate-300">
+                x
+              </div>
             )}
           </div>
 
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {POPULAR_TEAMS.map((team) => {
-              const isSelected = selectedTeam === team.name;
-              const isFavorite = favoriteTeams.includes(team.name);
+          {/* Visitante */}
+          <div className="flex flex-col items-center gap-2 min-w-0">
+            <TeamLogo
+              team={match.awayTeam}
+              size="w-14 h-14"
+            />
 
-              return (
-                <div
-                  key={team.id}
-                  className={`
-                    relative min-w-[92px]
-                    rounded-xl border
-                    p-3
-                    transition
-                    ${
-                      isSelected
-                        ? "border-emerald-500 bg-emerald-500/10"
-                        : "border-slate-800 bg-slate-900 hover:border-slate-700"
-                    }
-                  `}
-                >
-                  <button
-                    onClick={() => {
-                      setSelectedTeam(
-                        isSelected ? null : team.name
-                      );
-                      setSearchQuery("");
-                      setActiveTab("matches");
-                    }}
-                    className="w-full"
-                  >
-                    <div className="h-10 flex items-center justify-center mb-2">
-                      <img
-                        src={team.crest}
-                        alt={team.name}
-                        className="max-h-10 max-w-10 object-contain"
-                        loading="lazy"
-                      />
-                    </div>
-
-                    <div className="text-[11px] font-bold truncate">
-                      {team.shortName}
-                    </div>
-
-                    <div className="text-[9px] text-slate-500">
-                      {team.state}
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => toggleFavorite(team.name)}
-                    className="absolute top-1.5 right-1.5"
-                    title={
-                      isFavorite
-                        ? "Remover dos favoritos"
-                        : "Adicionar aos favoritos"
-                    }
-                  >
-                    <Star
-                      className={`w-3.5 h-3.5 ${
-                        isFavorite
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-slate-600"
-                      }`}
-                    />
-                  </button>
-                </div>
-              );
-            })}
+            <span className="text-sm font-bold text-slate-800 text-center leading-tight">
+              {match.awayTeam.name}
+            </span>
           </div>
-        </section>
+        </div>
 
-        {/* ====================================================
-            JOGOS
-            ==================================================== */}
+        {/* Estádio */}
+        <div className="mt-5 pt-4 border-t border-slate-100">
+          {match.venue?.name ? (
+            <div className="flex items-start gap-2">
+              <MapPin className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
 
-        {activeTab === "matches" && (
-          <section className="space-y-5">
-            <div>
-              <h2 className="text-2xl font-black">
-                Jogos de futebol hoje
-              </h2>
+              <div className="min-w-0">
+                <div className="text-sm font-semibold text-slate-700">
+                  {match.venue.name}
+                </div>
 
-              <p className="text-sm text-slate-400 mt-1">
-                Veja os horários e onde assistir às partidas.
-              </p>
+                {match.venue.city && (
+                  <div className="text-xs text-slate-400 mt-0.5">
+                    {match.venue.city}
+                    {match.venue.country
+                      ? ` · ${match.venue.country}`
+                      : ""}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-sm text-slate-400">
+              <MapPin className="w-4 h-4" />
+              Estádio ainda não informado
+            </div>
+          )}
+        </div>
+
+        {/* Onde assistir */}
+        <div className="mt-4 pt-4 border-t border-slate-100">
+          <div className="flex items-center gap-2 mb-2">
+            <Radio className="w-4 h-4 text-red-500" />
+
+            <span className="text-xs font-bold uppercase tracking-wide text-slate-500">
+              Onde assistir
+            </span>
+          </div>
+
+          <BroadcasterList
+            broadcasters={match.broadcasters}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   COMPONENTE: TIME DO TOPO
+========================================================= */
+
+function TeamQuickButton({
+  team,
+  selected,
+  onClick,
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`shrink-0 flex flex-col items-center gap-2 px-3 py-2 rounded-xl transition ${
+        selected
+          ? "bg-slate-900 text-white"
+          : "hover:bg-slate-100 text-slate-700"
+      }`}
+    >
+      <TeamLogo
+        team={team}
+        size="w-9 h-9"
+      />
+
+      <span className="text-[11px] font-semibold whitespace-nowrap max-w-[80px] truncate">
+        {team.name}
+      </span>
+    </button>
+  );
+}
+
+/* =========================================================
+   COMPONENTE: FILTROS DE DATA
+========================================================= */
+
+function DateFilter({
+  value,
+  onChange,
+}) {
+  const today = getBrazilDateString();
+  const tomorrow = addDays(today, 1);
+
+  const options = [
+    {
+      id: "today",
+      label: "Hoje",
+      date: today,
+    },
+    {
+      id: "tomorrow",
+      label: "Amanhã",
+      date: tomorrow,
+    },
+    {
+      id: "all",
+      label: "Todos",
+      date: null,
+    },
+  ];
+
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-1">
+      {options.map((option) => (
+        <button
+          key={option.id}
+          onClick={() => onChange(option.id)}
+          className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
+            value === option.id
+              ? "bg-slate-900 text-white"
+              : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+          }`}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* =========================================================
+   APP
+========================================================= */
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState("games");
+
+  const [matches, setMatches] = useState([]);
+
+  const [teams, setTeams] = useState([]);
+
+  const [selectedDate, setSelectedDate] = useState("today");
+
+  const [selectedTeam, setSelectedTeam] = useState(null);
+
+  const [selectedLeague, setSelectedLeague] = useState("all");
+
+  const [search, setSearch] = useState("");
+
+  const [loading, setLoading] = useState(true);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const [error, setError] = useState("");
+
+  const [usingDemoData, setUsingDemoData] = useState(false);
+
+  const [lastUpdate, setLastUpdate] = useState(null);
+
+  /* =======================================================
+     CARREGAR JOGOS
+  ======================================================= */
+
+  const loadMatches = useCallback(
+    async (showRefresh = false) => {
+      try {
+        if (showRefresh) {
+          setRefreshing(true);
+        } else {
+          setLoading(true);
+        }
+
+        setError("");
+
+        const response = await fetch(
+          MATCHES_ENDPOINT,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+            cache: "no-store",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Erro HTTP ${response.status}`
+          );
+        }
+
+        const data = await response.json();
+
+        /*
+          Aceita várias estruturas:
+
+          [
+            {...},
+            {...}
+          ]
+
+          ou
+
+          {
+            matches: [...]
+          }
+
+          ou
+
+          {
+            response: [...]
+          }
+        */
+
+        const rawMatches =
+          Array.isArray(data)
+            ? data
+            : Array.isArray(data.matches)
+            ? data.matches
+            : Array.isArray(data.response)
+            ? data.response
+            : Array.isArray(data.data)
+            ? data.data
+            : [];
+
+        const normalized = rawMatches
+          .map(normalizeMatch)
+          .filter((match) => match.date);
+
+        setMatches(normalized);
+        setUsingDemoData(false);
+        setLastUpdate(new Date());
+      } catch (err) {
+        console.error("Erro ao carregar jogos:", err);
+
+        /*
+          NÃO escondemos o erro.
+          Porém deixamos um jogo demonstrativo para
+          permitir visualizar a interface durante o
+          desenvolvimento.
+        */
+
+        setError(
+          "Não foi possível carregar os jogos pela API."
+        );
+
+        setMatches(
+          DEMO_MATCHES.map(normalizeMatch)
+        );
+
+        setUsingDemoData(true);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    []
+  );
+
+  /* =======================================================
+     CARREGAR TIMES
+  ======================================================= */
+
+  const loadTeams = useCallback(async () => {
+    try {
+      const response = await fetch(
+        TEAMS_ENDPOINT,
+        {
+          headers: {
+            Accept: "application/json",
+          },
+          cache: "no-store",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Erro HTTP ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+
+      const rawTeams =
+        Array.isArray(data)
+          ? data
+          : Array.isArray(data.teams)
+          ? data.teams
+          : Array.isArray(data.response)
+          ? data.response
+          : Array.isArray(data.data)
+          ? data.data
+          : [];
+
+      const normalizedTeams = rawTeams
+        .map((team) => ({
+          id: firstValid(
+            team?.id,
+            team?.teamId,
+            team?.team?.id,
+            null
+          ),
+
+          name: firstValid(
+            team?.name,
+            team?.team?.name,
+            team?.shortName,
+            "Time"
+          ),
+
+          logo: firstValid(
+            team?.logo,
+            team?.crest,
+            team?.badge,
+            team?.team?.logo,
+            team?.team?.crest,
+            ""
+          ),
+        }))
+        .filter((team) => team.name);
+
+      setTeams(normalizedTeams);
+    } catch (err) {
+      console.warn(
+        "Endpoint /api/teams não disponível.",
+        err
+      );
+
+      /*
+        Se a API de times não existir, montamos a lista
+        a partir dos próprios jogos.
+
+        Isso evita escudos incorretos inseridos manualmente.
+      */
+    }
+  }, []);
+
+  /* =======================================================
+     PRIMEIRO CARREGAMENTO
+  ======================================================= */
+
+  useEffect(() => {
+    loadMatches();
+    loadTeams();
+  }, [loadMatches, loadTeams]);
+
+  /* =======================================================
+     ATUALIZAÇÃO AUTOMÁTICA
+  ======================================================= */
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadMatches(true);
+    }, REFRESH_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [loadMatches]);
+
+  /* =======================================================
+     TIMES DO TOPO
+  ======================================================= */
+
+  const topTeams = useMemo(() => {
+    /*
+      Primeiro usa /api/teams.
+
+      Se o endpoint não estiver disponível,
+      usa os times encontrados nos próprios jogos.
+    */
+
+    if (teams.length > 0) {
+      return teams;
+    }
+
+    const map = new Map();
+
+    matches.forEach((match) => {
+      [match.homeTeam, match.awayTeam].forEach((team) => {
+        if (!team?.name) return;
+
+        const key =
+          team.id ||
+          normalizeText(team.name);
+
+        if (!map.has(key)) {
+          map.set(key, team);
+        }
+      });
+    });
+
+    return Array.from(map.values()).sort(
+      (a, b) =>
+        a.name.localeCompare(
+          b.name,
+          "pt-BR"
+        )
+    );
+  }, [teams, matches]);
+
+  /* =======================================================
+     LIGAS
+  ======================================================= */
+
+  const leagues = useMemo(() => {
+    const map = new Map();
+
+    matches.forEach((match) => {
+      if (!match.league?.name) return;
+
+      const key = normalizeText(
+        match.league.name
+      );
+
+      if (!map.has(key)) {
+        map.set(key, match.league.name);
+      }
+    });
+
+    return [
+      "all",
+      ...Array.from(map.values()),
+    ];
+  }, [matches]);
+
+  /* =======================================================
+     FILTROS
+  ======================================================= */
+
+  const filteredMatches = useMemo(() => {
+    const today = getBrazilDateString();
+    const tomorrow = addDays(today, 1);
+
+    let result = [...matches];
+
+    if (selectedDate === "today") {
+      result = result.filter(
+        (match) =>
+          getDateKey(match.date) === today
+      );
+    }
+
+    if (selectedDate === "tomorrow") {
+      result = result.filter(
+        (match) =>
+          getDateKey(match.date) === tomorrow
+      );
+    }
+
+    if (selectedTeam) {
+      const teamSearch = normalizeText(
+        selectedTeam.name
+      );
+
+      result = result.filter((match) => {
+        const home =
+          normalizeText(match.homeTeam.name);
+
+        const away =
+          normalizeText(match.awayTeam.name);
+
+        return (
+          home === teamSearch ||
+          away === teamSearch ||
+          String(match.homeTeam.id) ===
+            String(selectedTeam.id) ||
+          String(match.awayTeam.id) ===
+            String(selectedTeam.id)
+        );
+      });
+    }
+
+    if (selectedLeague !== "all") {
+      result = result.filter(
+        (match) =>
+          normalizeText(match.league.name) ===
+          normalizeText(selectedLeague)
+      );
+    }
+
+    if (search.trim()) {
+      const query =
+        normalizeText(search);
+
+      result = result.filter((match) => {
+        const values = [
+          match.homeTeam.name,
+          match.awayTeam.name,
+          match.league.name,
+          match.venue?.name,
+          match.venue?.city,
+          ...match.broadcasters.map(
+            (item) => item.name
+          ),
+        ];
+
+        return values.some((value) =>
+          normalizeText(value).includes(query)
+        );
+      });
+    }
+
+    result.sort(
+      (a, b) =>
+        new Date(a.date) -
+        new Date(b.date)
+    );
+
+    return result;
+  }, [
+    matches,
+    selectedDate,
+    selectedTeam,
+    selectedLeague,
+    search,
+  ]);
+
+  /* =======================================================
+     AGRUPAR POR DATA
+  ======================================================= */
+
+  const groupedMatches = useMemo(() => {
+    const groups = new Map();
+
+    filteredMatches.forEach((match) => {
+      const key = getDateKey(match.date);
+
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+
+      groups.get(key).push(match);
+    });
+
+    return Array.from(groups.entries());
+  }, [filteredMatches]);
+
+  /* =======================================================
+     LIMPAR FILTROS
+  ======================================================= */
+
+  function clearFilters() {
+    setSelectedTeam(null);
+    setSelectedLeague("all");
+    setSearch("");
+    setSelectedDate("today");
+  }
+
+  /* =======================================================
+     TABS
+  ======================================================= */
+
+  const tabs = [
+    {
+      id: "games",
+      label: "Jogos",
+      icon: CalendarDays,
+    },
+    {
+      id: "watch",
+      label: "Onde assistir",
+      icon: Tv,
+    },
+    {
+      id: "table",
+      label: "Tabela",
+      icon: Trophy,
+    },
+    {
+      id: "scorers",
+      label: "Artilharia",
+      icon: Users,
+    },
+  ];
+
+  /* =======================================================
+     RENDER
+  ======================================================= */
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      {/* =================================================
+          HEADER
+      ================================================= */}
+
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="h-16 flex items-center justify-between gap-4">
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center">
+                <Trophy className="w-5 h-5 text-white" />
+              </div>
+
+              <div>
+                <h1 className="font-black text-lg leading-none">
+                  Onde Tem Jogo?
+                </h1>
+
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Futebol e onde assistir
+                </p>
+              </div>
             </div>
 
-            {/* FILTROS */}
+            {/* Atualizar */}
+            <button
+              onClick={() => loadMatches(true)}
+              disabled={refreshing}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm font-semibold text-slate-600 disabled:opacity-50"
+            >
+              {refreshing ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
 
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 space-y-3">
-              <div className="flex flex-col md:flex-row gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <span className="hidden sm:inline">
+                Atualizar
+              </span>
+            </button>
+          </div>
 
-                  <input
-                    value={searchQuery}
-                    onChange={(e) =>
-                      setSearchQuery(e.target.value)
-                    }
-                    placeholder="Buscar time ou campeonato..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-emerald-500"
-                  />
+          {/* Tabs */}
+          <nav className="flex gap-1 overflow-x-auto">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() =>
+                    setActiveTab(tab.id)
+                  }
+                  className={`flex items-center gap-2 px-4 py-3 border-b-2 text-sm font-semibold whitespace-nowrap transition ${
+                    activeTab === tab.id
+                      ? "border-slate-900 text-slate-900"
+                      : "border-transparent text-slate-400 hover:text-slate-700"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+      </header>
+
+      {/* =================================================
+          CONTEÚDO
+      ================================================= */}
+
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        {/* Aviso de dados demonstrativos */}
+        {usingDemoData && (
+          <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+
+            <div>
+              <div className="font-bold text-sm text-amber-800">
+                API não respondeu
+              </div>
+
+              <div className="text-xs text-amber-700 mt-1">
+                O jogo exibido abaixo é apenas
+                demonstrativo. Os dados reais devem
+                vir do endpoint{" "}
+                <strong>/api/matches</strong>.
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Erro */}
+        {error && !usingDemoData && (
+          <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+
+            <div>
+              <div className="font-bold text-sm text-red-800">
+                Não foi possível atualizar os jogos
+              </div>
+
+              <div className="text-xs text-red-700 mt-1">
+                {error}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =================================================
+            ABA JOGOS
+        ================================================= */}
+
+        {activeTab === "games" && (
+          <>
+            {/* Hero */}
+            <section className="mb-6">
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-red-600 mb-1">
+                    FUTEBOL NO BRASIL
+                  </p>
+
+                  <h2 className="text-3xl md:text-4xl font-black tracking-tight">
+                    Onde tem jogo hoje?
+                  </h2>
+
+                  <p className="text-slate-500 mt-2 max-w-2xl">
+                    Veja os jogos do dia, horário,
+                    estádio e onde assistir.
+                  </p>
                 </div>
 
-                <div className="flex gap-1 bg-slate-950 border border-slate-800 p-1 rounded-xl">
-                  <button
-                    onClick={() => setDateFilter("hoje")}
-                    className={`px-4 py-2 rounded-lg text-xs font-bold ${
-                      dateFilter === "hoje"
-                        ? "bg-emerald-500 text-slate-950"
-                        : "text-slate-400"
-                    }`}
-                  >
-                    Hoje
-                  </button>
+                {lastUpdate && (
+                  <div className="text-xs text-slate-400">
+                    Atualizado às{" "}
+                    {new Intl.DateTimeFormat(
+                      "pt-BR",
+                      {
+                        timeZone:
+                          BRAZIL_TIMEZONE,
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    ).format(lastUpdate)}
+                  </div>
+                )}
+              </div>
+            </section>
 
-                  <button
-                    onClick={() => setDateFilter("todos")}
-                    className={`px-4 py-2 rounded-lg text-xs font-bold ${
-                      dateFilter === "todos"
-                        ? "bg-emerald-500 text-slate-950"
-                        : "text-slate-400"
-                    }`}
-                  >
-                    Todos
-                  </button>
+            {/* Times */}
+            {topTeams.length > 0 && (
+              <section className="mb-5">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-bold text-sm text-slate-700">
+                    Times
+                  </h3>
+
+                  {selectedTeam && (
+                    <button
+                      onClick={() =>
+                        setSelectedTeam(null)
+                      }
+                      className="text-xs text-red-600 font-semibold"
+                    >
+                      Limpar
+                    </button>
+                  )}
+                </div>
+
+                <div className="bg-white border border-slate-200 rounded-2xl p-2 overflow-x-auto">
+                  <div className="flex gap-1 min-w-max">
+                    {topTeams.map((team) => (
+                      <TeamQuickButton
+                        key={
+                          team.id ||
+                          team.name
+                        }
+                        team={team}
+                        selected={
+                          selectedTeam?.id ===
+                            team.id ||
+                          (
+                            selectedTeam &&
+                            normalizeText(
+                              selectedTeam.name
+                            ) ===
+                              normalizeText(
+                                team.name
+                              )
+                          )
+                        }
+                        onClick={() =>
+                          setSelectedTeam(
+                            selectedTeam &&
+                            (
+                              selectedTeam.id ===
+                                team.id ||
+                              normalizeText(
+                                selectedTeam.name
+                              ) ===
+                                normalizeText(
+                                  team.name
+                                )
+                            )
+                              ? null
+                              : team
+                          )
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Filtros */}
+            <section className="mb-6">
+              <div className="flex flex-col lg:flex-row gap-3">
+                <DateFilter
+                  value={selectedDate}
+                  onChange={setSelectedDate}
+                />
+
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+
+                  <input
+                    value={search}
+                    onChange={(e) =>
+                      setSearch(e.target.value)
+                    }
+                    placeholder="Buscar time, estádio, competição ou transmissão..."
+                    className="w-full h-10 pl-10 pr-10 rounded-full border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-slate-200 text-sm"
+                  />
+
+                  {search && (
+                    <button
+                      onClick={() => setSearch("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               </div>
 
+              {/* Ligas */}
               {leagues.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto">
+                <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
                   {leagues.map((league) => (
                     <button
                       key={league}
                       onClick={() =>
                         setSelectedLeague(league)
                       }
-                      className={`whitespace-nowrap px-3 py-2 rounded-lg text-xs font-bold ${
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${
                         selectedLeague === league
-                          ? "bg-emerald-500 text-slate-950"
-                          : "bg-slate-950 border border-slate-800 text-slate-400"
+                          ? "bg-slate-800 text-white"
+                          : "bg-white border border-slate-200 text-slate-500 hover:bg-slate-50"
                       }`}
                     >
-                      {league === "todas"
-                        ? "Todos"
+                      {league === "all"
+                        ? "Todas as competições"
                         : league}
                     </button>
                   ))}
                 </div>
               )}
-            </div>
+            </section>
 
-            {/* ERRO */}
-
-            {error && (
-              <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-400 mt-0.5" />
-
-                  <div className="flex-1">
-                    <p className="font-bold text-red-300">
-                      Não foi possível atualizar os jogos
-                    </p>
-
-                    <p className="text-xs text-red-200/70 mt-1">
-                      {error}
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={fetchMatches}
-                    className="text-xs font-bold text-red-300 hover:underline"
-                  >
-                    Tentar novamente
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* LOADING */}
-
+            {/* Estado carregando */}
             {loading && (
-              <div className="space-y-3">
-                {[1, 2, 3].map((item) => (
-                  <div
-                    key={item}
-                    className="h-48 rounded-2xl bg-slate-900 border border-slate-800 animate-pulse"
-                  />
-                ))}
-              </div>
-            )}
+              <div className="py-20 flex flex-col items-center justify-center text-slate-400">
+                <Loader2 className="w-8 h-8 animate-spin mb-3" />
 
-            {/* RESULTADOS */}
-
-            {!loading && !error && (
-              <>
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-slate-300">
-                    {filteredMatches.length}{" "}
-                    {filteredMatches.length === 1
-                      ? "partida"
-                      : "partidas"}
-                  </h3>
-
-                  <button
-                    onClick={fetchMatches}
-                    className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-emerald-400"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    Atualizar
-                  </button>
-                </div>
-
-                {filteredMatches.length === 0 ? (
-                  <EmptyState />
-                ) : (
-                  <div className="grid gap-4">
-                    {filteredMatches.map((match) => (
-                      <MatchCard
-                        key={match.id}
-                        match={match}
-                      />
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-          </section>
-        )}
-
-        {/* ====================================================
-            MEUS TIMES
-            ==================================================== */}
-
-        {activeTab === "favorites" && (
-          <section className="space-y-5">
-            <div>
-              <h2 className="text-2xl font-black">
-                Meus times
-              </h2>
-
-              <p className="text-sm text-slate-400 mt-1">
-                Jogos dos clubes que você marcou como favoritos.
-              </p>
-            </div>
-
-            {favoriteTeams.length === 0 ? (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-10 text-center">
-                <Star className="w-8 h-8 mx-auto text-slate-600 mb-3" />
-
-                <h3 className="font-bold">
-                  Você ainda não escolheu nenhum time.
-                </h3>
-
-                <p className="text-xs text-slate-500 mt-2">
-                  Clique na estrela dos times que deseja acompanhar.
+                <p className="text-sm">
+                  Carregando jogos...
                 </p>
               </div>
-            ) : (
-              <>
-                <div className="flex gap-2 flex-wrap">
-                  {favoriteTeams.map((team) => (
-                    <button
-                      key={team}
-                      onClick={() => {
-                        setSelectedTeam(team);
-                        setActiveTab("matches");
-                      }}
-                      className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold"
-                    >
-                      ⭐ {team}
-                    </button>
-                  ))}
-                </div>
-
-                {favoriteMatches.length === 0 ? (
-                  <EmptyState text="Nenhum jogo encontrado para seus times favoritos." />
-                ) : (
-                  <div className="space-y-4">
-                    {favoriteMatches.map((match) => (
-                      <MatchCard
-                        key={match.id}
-                        match={match}
-                      />
-                    ))}
-                  </div>
-                )}
-              </>
             )}
-          </section>
+
+            {/* Sem jogos */}
+            {!loading &&
+              groupedMatches.length === 0 && (
+                <div className="bg-white border border-slate-200 rounded-2xl py-16 px-6 text-center">
+                  <CalendarDays className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+
+                  <h3 className="font-bold text-slate-700">
+                    Nenhum jogo encontrado
+                  </h3>
+
+                  <p className="text-sm text-slate-400 mt-1">
+                    Tente mudar a data ou remover
+                    algum filtro.
+                  </p>
+
+                  <button
+                    onClick={clearFilters}
+                    className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 text-white text-sm font-semibold"
+                  >
+                    Limpar filtros
+                  </button>
+                </div>
+              )}
+
+            {/* Jogos */}
+            {!loading &&
+              groupedMatches.map(
+                ([date, dayMatches]) => (
+                  <section
+                    key={date}
+                    className="mb-8"
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="h-px bg-slate-200 flex-1" />
+
+                      <h3 className="text-sm font-bold text-slate-500 uppercase">
+                        {date ===
+                        getBrazilDateString()
+                          ? "Hoje"
+                          : formatDate(
+                              dayMatches[0].date
+                            )}
+                      </h3>
+
+                      <div className="h-px bg-slate-200 flex-1" />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                      {dayMatches.map(
+                        (match) => (
+                          <MatchCard
+                            key={match.id}
+                            match={match}
+                          />
+                        )
+                      )}
+                    </div>
+                  </section>
+                )
+              )}
+          </>
         )}
 
-        {/* ====================================================
-            ONDE ASSISTIR
-            ==================================================== */}
+        {/* =================================================
+            ABA ONDE ASSISTIR
+        ================================================= */}
 
-        {activeTab === "guide" && (
-          <section className="space-y-5">
-            <div>
-              <h2 className="text-2xl font-black">
+        {activeTab === "watch" && (
+          <section>
+            <div className="mb-6">
+              <p className="text-sm font-semibold text-red-600 mb-1">
+                TRANSMISSÕES
+              </p>
+
+              <h2 className="text-3xl font-black">
                 Onde assistir aos jogos
               </h2>
 
-              <p className="text-sm text-slate-400 mt-1">
-                A informação de transmissão deve estar vinculada
-                a cada partida.
+              <p className="text-slate-500 mt-2">
+                Filtre pelos canais e plataformas
+                disponíveis para cada partida.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <GuideCard
-                name="TV Globo"
-                type="TV aberta"
-                description="Partidas selecionadas."
-              />
-
-              <GuideCard
-                name="SporTV"
-                type="TV por assinatura"
-                description="Diversas competições nacionais."
-              />
-
-              <GuideCard
-                name="Premiere"
-                type="Pay-per-view"
-                description="Jogos disponíveis conforme os direitos de transmissão."
-              />
-
-              <GuideCard
-                name="CazéTV"
-                type="Streaming"
-                description="Partidas disponíveis conforme os direitos vigentes."
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {matches
+                .filter(
+                  (match) =>
+                    match.broadcasters?.length
+                )
+                .sort(
+                  (a, b) =>
+                    new Date(a.date) -
+                    new Date(b.date)
+                )
+                .map((match) => (
+                  <MatchCard
+                    key={match.id}
+                    match={match}
+                  />
+                ))}
             </div>
 
-            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-xs text-amber-200/80">
-              <Info className="w-4 h-4 inline mr-2" />
-              Os direitos de transmissão podem mudar. A versão
-              definitiva do site deverá obter essa informação por
-              fonte atualizada para cada partida.
+            {matches.filter(
+              (match) =>
+                match.broadcasters?.length
+            ).length === 0 && (
+              <div className="bg-white border border-slate-200 rounded-2xl py-16 text-center">
+                <Tv className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+
+                <h3 className="font-bold">
+                  Nenhuma transmissão informada
+                </h3>
+
+                <p className="text-sm text-slate-400 mt-1">
+                  A API ainda não retornou os
+                  dados de transmissão.
+                </p>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* =================================================
+            ABA TABELA
+        ================================================= */}
+
+        {activeTab === "table" && (
+          <section>
+            <div className="mb-6">
+              <p className="text-sm font-semibold text-red-600 mb-1">
+                CLASSIFICAÇÃO
+              </p>
+
+              <h2 className="text-3xl font-black">
+                Tabela do campeonato
+              </h2>
+
+              <p className="text-slate-500 mt-2">
+                A tabela deve ser alimentada pela API
+                para permanecer atualizada.
+              </p>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center">
+              <Trophy className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+
+              <h3 className="font-bold text-slate-700">
+                Tabela dinâmica
+              </h3>
+
+              <p className="text-sm text-slate-400 max-w-md mx-auto mt-2">
+                Conecte o endpoint de classificação
+                da API para que posições, pontos,
+                vitórias, saldo e demais estatísticas
+                sejam atualizados automaticamente.
+              </p>
             </div>
           </section>
         )}
 
-        {/* ====================================================
-            NOTÍCIAS
-            ==================================================== */}
+        {/* =================================================
+            ABA ARTILHARIA
+        ================================================= */}
 
-        {activeTab === "news" && (
-          <section className="space-y-5">
-            <div>
-              <h2 className="text-2xl font-black">
-                Últimas notícias
+        {activeTab === "scorers" && (
+          <section>
+            <div className="mb-6">
+              <p className="text-sm font-semibold text-red-600 mb-1">
+                ARTILHARIA
+              </p>
+
+              <h2 className="text-3xl font-black">
+                Artilheiros
               </h2>
 
-              <p className="text-sm text-slate-400 mt-1">
-                Notícias relacionadas ao futebol brasileiro.
+              <p className="text-slate-500 mt-2">
+                Os dados devem vir da API para evitar
+                informações desatualizadas.
               </p>
             </div>
 
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {NEWS_TEAMS.map((team) => (
-                <button
-                  key={team}
-                  onClick={() => setSelectedNewsTeam(team)}
-                  className={`whitespace-nowrap px-3 py-2 rounded-lg text-xs font-bold ${
-                    selectedNewsTeam === team
-                      ? "bg-emerald-500 text-slate-950"
-                      : "bg-slate-900 border border-slate-800 text-slate-400"
-                  }`}
-                >
-                  {team}
-                </button>
-              ))}
+            <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center">
+              <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+
+              <h3 className="font-bold text-slate-700">
+                Artilharia dinâmica
+              </h3>
+
+              <p className="text-sm text-slate-400 max-w-md mx-auto mt-2">
+                Conecte o endpoint de artilharia da
+                API para carregar jogadores e gols
+                automaticamente.
+              </p>
             </div>
-
-            {newsLoading ? (
-              <div className="grid md:grid-cols-3 gap-4">
-                {[1, 2, 3].map((item) => (
-                  <div
-                    key={item}
-                    className="h-44 bg-slate-900 border border-slate-800 rounded-2xl animate-pulse"
-                  />
-                ))}
-              </div>
-            ) : rssNews.length === 0 ? (
-              <EmptyState text="Nenhuma notícia encontrada." />
-            ) : (
-              <div className="grid md:grid-cols-3 gap-4">
-                {rssNews.map((item, index) => (
-                  <a
-                    key={`${item.link}-${index}`}
-                    href={item.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group bg-slate-900 border border-slate-800 rounded-2xl p-4 hover:border-emerald-500/50 transition"
-                  >
-                    <div className="flex justify-between gap-3 text-[10px] text-slate-500">
-                      <span>{selectedNewsTeam}</span>
-
-                      <span>
-                        {item.pubDate
-                          ? formatBrazilDate(item.pubDate)
-                          : ""}
-                      </span>
-                    </div>
-
-                    <h3 className="mt-3 text-sm font-bold leading-snug group-hover:text-emerald-400">
-                      {item.title}
-                    </h3>
-
-                    <div className="flex items-center gap-2 mt-5 text-xs text-emerald-400 font-bold">
-                      Ler notícia
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
           </section>
         )}
       </main>
 
-      {/* FOOTER */}
+      {/* =================================================
+          FOOTER
+      ================================================= */}
 
-      <footer className="max-w-6xl mx-auto px-4 py-10 text-center text-xs text-slate-600">
-        <p>
-          Onde tem Jogo? — Guia de jogos, horários e transmissões.
-        </p>
+      <footer className="border-t border-slate-200 bg-white mt-12">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <div className="font-black">
+                Onde Tem Jogo?
+              </div>
 
-        <p className="mt-2">
-          As informações de transmissão devem ser confirmadas
-          junto às plataformas responsáveis.
-        </p>
+              <p className="text-xs text-slate-400 mt-1">
+                Jogos de futebol e onde assistir.
+              </p>
+            </div>
+
+            <div className="text-xs text-slate-400">
+              Horários exibidos no fuso de Brasília.
+            </div>
+          </div>
+        </div>
       </footer>
-    </div>
-  );
-}
-
-/* ============================================================
-   COMPONENTES
-   ============================================================ */
-
-function NavButton({ active, onClick, icon, children }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`
-        flex items-center gap-1.5
-        whitespace-nowrap
-        px-3 py-2
-        rounded-lg
-        text-xs font-bold
-        transition
-        ${
-          active
-            ? "bg-emerald-500 text-slate-950"
-            : "text-slate-400 hover:text-white hover:bg-slate-900"
-        }
-      `}
-    >
-      {icon}
-      {children}
-    </button>
-  );
-}
-
-/* ============================================================
-   CARD DE PARTIDA
-   ============================================================ */
-
-function MatchCard({ match }) {
-  const home = match.homeTeam || {};
-  const away = match.awayTeam || {};
-
-  const live = isLive(match.status);
-
-  const statusLabel = getMatchStatusLabel(match.status);
-
-  const homeScore =
-    match.score?.fullTime?.home ??
-    match.score?.home ??
-    null;
-
-  const awayScore =
-    match.score?.fullTime?.away ??
-    match.score?.away ??
-    null;
-
-  const broadcasts = Array.isArray(match.broadcasts)
-    ? match.broadcasts
-    : match.broadcaster
-    ? [{ name: match.broadcaster }]
-    : [];
-
-  return (
-    <article className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-slate-700 transition">
-      {/* TOPO */}
-
-      <div className="px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-            <Trophy className="w-3.5 h-3.5" />
-            {match.competition?.name || "Futebol"}
-          </span>
-
-          {match.matchday && (
-            <span className="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400">
-              {match.matchday}ª rodada
-            </span>
-          )}
-
-          {match.categoryTag && (
-            <span className="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400">
-              {match.categoryTag}
-            </span>
-          )}
-        </div>
-
-        <div className="text-xs text-slate-400 flex items-center gap-2">
-          <Calendar className="w-3.5 h-3.5" />
-          {formatBrazilDate(match.utcDate)}
-        </div>
-      </div>
-
-      {/* TIMES */}
-
-      <div className="p-5">
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-          <TeamSide
-            team={home}
-            align="right"
-            score={homeScore}
-          />
-
-          <div className="text-center min-w-[70px]">
-            {live ? (
-              <div className="space-y-1">
-                <span className="inline-flex items-center gap-1.5 bg-red-500/15 border border-red-500/30 text-red-400 px-3 py-1 rounded-full text-[10px] font-black animate-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                  {statusLabel || "AO VIVO"}
-                </span>
-
-                {homeScore !== null &&
-                  awayScore !== null && (
-                    <div className="text-2xl font-black">
-                      {homeScore} - {awayScore}
-                    </div>
-                  )}
-              </div>
-            ) : match.status === "FINISHED" ? (
-              <div>
-                <div className="text-[10px] text-slate-500 mb-1">
-                  ENCERRADO
-                </div>
-
-                <div className="text-2xl font-black">
-                  {homeScore ?? "-"} - {awayScore ?? "-"}
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="text-2xl font-black">
-                  {formatBrazilTime(match.utcDate)}
-                </div>
-
-                <div className="text-[10px] text-slate-500 mt-1">
-                  Horário de Brasília
-                </div>
-              </>
-            )}
-          </div>
-
-          <TeamSide
-            team={away}
-            align="left"
-            score={awayScore}
-          />
-        </div>
-      </div>
-
-      {/* INFORMAÇÕES */}
-
-      <div className="border-t border-slate-800 px-4 py-3 grid md:grid-cols-2 gap-3">
-        <div className="flex items-center gap-2 text-xs text-slate-400">
-          <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
-
-          <span>
-            {match.venue || "Estádio não informado"}
-          </span>
-        </div>
-
-        <div className="flex items-start gap-2 text-xs">
-          <Tv className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-
-          <div>
-            <span className="text-slate-500 block mb-1">
-              Onde assistir
-            </span>
-
-            {broadcasts.length > 0 ? (
-              <div className="flex flex-wrap gap-1.5">
-                {broadcasts.map((broadcast, index) => (
-                  <span
-                    key={index}
-                    className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 px-2 py-1 rounded-md font-bold"
-                  >
-                    {broadcast.name}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <span className="text-slate-500">
-                Informação não disponível
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* LINK PARA PÁGINA DA PARTIDA */}
-
-      <div className="border-t border-slate-800">
-        <button className="w-full px-4 py-3 flex items-center justify-between text-xs font-bold text-slate-400 hover:text-emerald-400 transition">
-          Ver detalhes da partida
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
-    </article>
-  );
-}
-
-/* ============================================================
-   TIME
-   ============================================================ */
-
-function TeamSide({ team, align, score }) {
-  const isRight = align === "right";
-
-  return (
-    <div
-      className={`flex items-center gap-3 ${
-        isRight ? "justify-end text-right" : "justify-start text-left"
-      }`}
-    >
-      <div className={isRight ? "order-1" : "order-2"}>
-        <div className="font-bold text-sm md:text-base">
-          {team.shortName || team.name || "Time"}
-        </div>
-
-        {team.name && team.shortName !== team.name && (
-          <div className="text-[10px] text-slate-500">
-            {team.name}
-          </div>
-        )}
-      </div>
-
-      <div
-        className={`w-12 h-12 flex items-center justify-center ${
-          isRight ? "order-2" : "order-1"
-        }`}
-      >
-        {team.crest ? (
-          <img
-            src={team.crest}
-            alt={team.name || "Escudo"}
-            className="max-w-12 max-h-12 object-contain"
-            loading="lazy"
-          />
-        ) : (
-          <Shield className="w-8 h-8 text-slate-700" />
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ============================================================
-   GUIA
-   ============================================================ */
-
-function GuideCard({ name, type, description }) {
-  return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="font-black text-emerald-400">
-            {name}
-          </h3>
-
-          <p className="text-xs text-slate-500 mt-1">
-            {type}
-          </p>
-        </div>
-
-        <Tv className="w-5 h-5 text-slate-600" />
-      </div>
-
-      <p className="text-sm text-slate-400 mt-4">
-        {description}
-      </p>
-    </div>
-  );
-}
-
-/* ============================================================
-   ESTADO VAZIO
-   ============================================================ */
-
-function EmptyState({
-  text = "Nenhuma partida encontrada para os filtros selecionados.",
-}) {
-  return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-10 text-center">
-      <Calendar className="w-8 h-8 mx-auto text-slate-700 mb-3" />
-
-      <p className="text-sm text-slate-400">
-        {text}
-      </p>
     </div>
   );
 }
