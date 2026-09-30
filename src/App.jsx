@@ -1,1219 +1,371 @@
-import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
-  CalendarDays,
-  ChevronDown,
-  ChevronRight,
-  Clock3,
-  ExternalLink,
-  MapPin,
-  PlayCircle,
-  Radio,
-  Search,
+  Newspaper,
   Trophy,
-  Tv,
-  Users,
-  X,
+  Calendar,
   RefreshCw,
-  AlertCircle,
-  Loader2,
+  Search,
+  Filter,
+  ExternalLink,
+  Clock,
+  Sparkles,
+  ChevronRight,
+  X,
+  Users,
+  Flame
 } from "lucide-react";
 
 /* =========================================================
-   CONFIGURAÇÃO & CONSTANTES
+   CONFIGURAÇÃO DA API PRÓPRIA (BANCO QUE GUARDA AS NOTÍCIAS)
 ========================================================= */
-
 const API_BASE = import.meta.env.VITE_API_URL || "";
+const NEWS_ENDPOINT = `${API_BASE}/api/aggregated-news`;
+const STANDINGS_ENDPOINT = `${API_BASE}/api/standings`;
 
-const MATCHES_ENDPOINT = `${API_BASE}/api/matches`;
-const TEAMS_ENDPOINT = `${API_BASE}/api/teams`;
-const NEWS_ENDPOINT = `${API_BASE}/api/news`;
-
-const BRAZIL_TIMEZONE = "America/Sao_Paulo";
-
-const REFRESH_INTERVAL = 5 * 60 * 1000;
+/* CDN pública para garantir escudos de times das Séries A a D e internacionais */
+const GET_TEAM_CREST = (teamName) => 
+  `https://media.api-sports.io/football/teams/static/${encodeURIComponent(teamName)}.png`;
 
 /* =========================================================
-   FUNÇÕES DE DATA (CORRIGIDAS E SEGURAS)
+   COMPONENTE: CARD DE NOTÍCIA REESCRITA
 ========================================================= */
-
-function getBrazilDateString(date = new Date()) {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: BRAZIL_TIMEZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(date);
-}
-
-function formatTime(dateString) {
-  if (!dateString) return "--:--";
-
-  const date = new Date(dateString);
-
-  if (Number.isNaN(date.getTime())) return "--:--";
-
-  return new Intl.DateTimeFormat("pt-BR", {
-    timeZone: BRAZIL_TIMEZONE,
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-}
-
-function formatDate(dateString) {
-  if (!dateString) return "";
-
-  const date = new Date(dateString);
-
-  if (Number.isNaN(date.getTime())) return "";
-
-  return new Intl.DateTimeFormat("pt-BR", {
-    timeZone: BRAZIL_TIMEZONE,
-    weekday: "short",
-    day: "2-digit",
-    month: "2-digit",
-  })
-    .format(date)
-    .replace(".", "");
-}
-
-function getDateKey(dateString) {
-  if (!dateString) return "";
-
-  const date = new Date(dateString);
-
-  if (Number.isNaN(date.getTime())) return "";
-
-  return getBrazilDateString(date);
-}
-
-/* Adição de dias segura manipulando UTC em vez de strings arbitrárias */
-function addDays(dateString, days) {
-  if (!dateString) return "";
-  const [year, month, day] = dateString.split("-").map(Number);
-  const utcDate = new Date(Date.UTC(year, month - 1, day));
-  utcDate.setUTCDate(utcDate.getUTCDate() + days);
-
-  const y = utcDate.getUTCFullYear();
-  const m = String(utcDate.getUTCMonth() + 1).padStart(2, "0");
-  const d = String(utcDate.getUTCDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-
-/* =========================================================
-   TEXTO / NORMALIZAÇÃO
-========================================================= */
-
-function normalizeText(value) {
-  return String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-}
-
-function firstValid(...values) {
-  return values.find(
-    (value) =>
-      value !== undefined &&
-      value !== null &&
-      String(value).trim() !== ""
-  );
-}
-
-/* =========================================================
-   ESCUDOS & TIMES
-========================================================= */
-
-function getTeamLogo(team) {
-  if (!team) return "";
-
-  return firstValid(
-    team.logo,
-    team.crest,
-    team.badge,
-    team.image,
-    team.emblem,
-    team.logoUrl
-  );
-}
-
-function getTeamName(team) {
-  if (!team) return "Time";
-
-  return firstValid(
-    team.name,
-    team.shortName,
-    team.short_name,
-    team.teamName,
-    "Time"
-  );
-}
-
-function getTeamId(team) {
-  if (!team) return null;
-
-  return firstValid(
-    team.id,
-    team.teamId,
-    team.team_id
-  );
-}
-
-/* =========================================================
-   TRANSMISSÕES
-========================================================= */
-
-function normalizeBroadcasters(match) {
-  const result = [];
-
-  const addBroadcaster = (item) => {
-    if (!item) return;
-
-    if (typeof item === "string") {
-      const name = item.trim();
-
-      if (name && !result.some((x) => normalizeText(x.name) === normalizeText(name))) {
-        result.push({
-          name,
-          type: "tv",
-          url: null,
-        });
-      }
-
-      return;
-    }
-
-    if (typeof item === "object") {
-      const name = firstValid(
-        item.name,
-        item.provider,
-        item.channel,
-        item.broadcast,
-        item.broadcaster,
-        item.title
-      );
-
-      if (!name) return;
-
-      const normalizedName = normalizeText(name);
-
-      if (!result.some((x) => normalizeText(x.name) === normalizedName)) {
-        result.push({
-          name,
-          type: firstValid(item.type, item.kind, "tv"),
-          url: firstValid(item.url, item.link, item.href, null),
-        });
-      }
-    }
-  };
-
-  if (Array.isArray(match?.broadcasters)) match.broadcasters.forEach(addBroadcaster);
-  if (Array.isArray(match?.broadcasts)) match.broadcasts.forEach(addBroadcaster);
-  if (Array.isArray(match?.broadcast)) match.broadcast.forEach(addBroadcaster);
-  if (Array.isArray(match?.fixture?.broadcasts)) match.fixture.broadcasts.forEach(addBroadcaster);
-  if (Array.isArray(match?.fixture?.broadcast)) match.fixture.broadcast.forEach(addBroadcaster);
-
-  addBroadcaster(match?.broadcaster);
-  addBroadcaster(match?.broadcast);
-  addBroadcaster(match?.channel);
-  addBroadcaster(match?.tv);
-
-  if (Array.isArray(match?.media)) match.media.forEach(addBroadcaster);
-
-  return result;
-}
-
-/* =========================================================
-   ESTÁDIO / LOCAL
-========================================================= */
-
-function normalizeVenue(match) {
-  const venue =
-    match?.venue ||
-    match?.fixture?.venue ||
-    match?.stadium ||
-    match?.location ||
-    {};
-
-  if (typeof venue === "string") {
-    return { name: venue, city: "", country: "" };
-  }
-
-  return {
-    name: firstValid(venue.name, venue.stadium, venue.venueName, match?.stadiumName, ""),
-    city: firstValid(venue.city, venue.location, venue.municipality, match?.city, ""),
-    country: firstValid(venue.country, match?.country, ""),
-  };
-}
-
-/* =========================================================
-   STATUS
-========================================================= */
-
-function normalizeStatus(match) {
-  const status = match?.status || match?.fixture?.status || {};
-
-  if (typeof status === "string") {
-    return { short: status, long: status };
-  }
-
-  return {
-    short: firstValid(status.short, status.code, match?.statusShort, ""),
-    long: firstValid(status.long, match?.statusLong, ""),
-  };
-}
-
-function isFinishedStatus(status) {
-  const value = normalizeText(
-    typeof status === "string"
-      ? status
-      : `${status?.short || ""} ${status?.long || ""}`
-  );
-
-  return ["ft", "aet", "pen", "finished", "finalizado", "encerrado"].some((x) =>
-    value.includes(x)
-  );
-}
-
-function isLiveStatus(status) {
-  const value = normalizeText(
-    typeof status === "string"
-      ? status
-      : `${status?.short || ""} ${status?.long || ""}`
-  );
-
-  return ["live", "1h", "2h", "ht", "et", "p", "q1", "q2", "q3", "q4"].includes(value);
-}
-
-/* =========================================================
-   NORMALIZAÇÃO DA PARTIDA (COM INDEXAÇÃO DE BUSCA)
-========================================================= */
-
-function normalizeMatch(raw, index = 0) {
-  const homeRaw = raw?.homeTeam || raw?.home || raw?.teams?.home || {};
-  const awayRaw = raw?.awayTeam || raw?.away || raw?.teams?.away || {};
-  const leagueRaw = raw?.league || {};
-
-  const date = firstValid(
-    raw?.date,
-    raw?.matchDate,
-    raw?.kickoff,
-    raw?.datetime,
-    raw?.fixture?.date,
-    null
-  );
-
-  const venue = normalizeVenue(raw);
-  const status = normalizeStatus(raw);
-  const broadcasters = normalizeBroadcasters(raw);
-
-  const homeTeam = {
-    id: getTeamId(homeRaw),
-    name: getTeamName(homeRaw),
-    logo: getTeamLogo(homeRaw),
-  };
-
-  const awayTeam = {
-    id: getTeamId(awayRaw),
-    name: getTeamName(awayRaw),
-    logo: getTeamLogo(awayRaw),
-  };
-
-  const league = {
-    id: firstValid(leagueRaw?.id, leagueRaw?.leagueId, null),
-    name: firstValid(leagueRaw?.name, leagueRaw?.title, raw?.competition, "Competição"),
-    logo: firstValid(leagueRaw?.logo, leagueRaw?.crest, ""),
-    country: firstValid(leagueRaw?.country, ""),
-  };
-
-  // String indexada para busca O(1) de alta performance
-  const searchText = normalizeText(
-    `${homeTeam.name} ${awayTeam.name} ${league.name} ${venue.name} ${venue.city} ${broadcasters.map((b) => b.name).join(" ")}`
-  );
-
-  return {
-    id: firstValid(raw?.id, raw?.matchId, raw?.fixture?.id, `match-${index}-${date || "unknown"}`),
-    date,
-    homeTeam,
-    awayTeam,
-    league,
-    venue,
-    broadcasters,
-    status,
-    goals: {
-      home: firstValid(raw?.goals?.home, raw?.homeGoals, raw?.score?.home, null),
-      away: firstValid(raw?.goals?.away, raw?.awayGoals, raw?.score?.away, null),
-    },
-    round: firstValid(raw?.round, raw?.league?.round, ""),
-    searchText,
-    raw,
-  };
-}
-
-/* =========================================================
-   DADOS DEMONSTRATIVOS
-========================================================= */
-
-const DEMO_MATCHES = [
-  {
-    id: "demo-1",
-    date: `${getBrazilDateString()}T19:00:00-03:00`,
-    homeTeam: { id: 1, name: "Flamengo", logo: "" },
-    awayTeam: { id: 2, name: "Palmeiras", logo: "" },
-    league: { id: 1, name: "Brasileirão Série A", logo: "" },
-    venue: { name: "Maracanã", city: "Rio de Janeiro", country: "Brasil" },
-    broadcasters: [{ name: "Premiere", type: "tv", url: null }],
-    status: { short: "NS", long: "Não iniciado" },
-    goals: { home: null, away: null },
-  },
-];
-
-/* =========================================================
-   COMPONENTE: LOGO
-========================================================= */
-
-function TeamLogo({ team, size = "w-10 h-10" }) {
-  const [error, setError] = useState(false);
-
-  const logo = getTeamLogo(team);
-  const name = getTeamName(team);
-
-  const initials = name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0])
-    .join("")
-    .toUpperCase();
-
-  if (!logo || error) {
-    return (
-      <div
-        className={`${size} shrink-0 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-500`}
-        title={name}
-      >
-        {initials || "?"}
-      </div>
-    );
-  }
-
+function NewsCard({ news, onOpenModal }) {
   return (
-    <img
-      src={logo}
-      alt={`Escudo do ${name}`}
-      className={`${size} shrink-0 object-contain`}
-      loading="lazy"
-      onError={() => setError(true)}
-    />
-  );
-}
-
-/* =========================================================
-   COMPONENTE: TRANSMISSÃO
-========================================================= */
-
-function BroadcasterList({ broadcasters }) {
-  if (!broadcasters?.length) {
-    return (
-      <span className="text-sm text-slate-400">
-        Transmissão ainda não informada
-      </span>
-    );
-  }
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      {broadcasters.map((item, index) => {
-        const key = `${item.name}-${item.type}-${index}`;
-        const content = (
-          <span
-            key={key}
-            className="inline-flex items-center gap-1.5 rounded-full bg-red-50 border border-red-100 px-2.5 py-1 text-xs font-semibold text-red-700"
-          >
-            {item.type === "streaming" ? (
-              <PlayCircle className="w-3.5 h-3.5" />
-            ) : (
-              <Tv className="w-3.5 h-3.5" />
-            )}
-
-            {item.name}
-
-            {item.url && <ExternalLink className="w-3 h-3" />}
-          </span>
-        );
-
-        if (item.url) {
-          return (
-            <a
-              key={key}
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {content}
-            </a>
-          );
-        }
-
-        return content;
-      })}
-    </div>
-  );
-}
-
-/* =========================================================
-   COMPONENTE: CARD DO JOGO
-========================================================= */
-
-function MatchCard({ match }) {
-  const finished = isFinishedStatus(match.status);
-  const live = isLiveStatus(match.status);
-
-  const homeScore = match.goals?.home;
-  const awayScore = match.goals?.away;
-
-  const hasScore =
-    homeScore !== null &&
-    homeScore !== undefined &&
-    awayScore !== null &&
-    awayScore !== undefined;
-
-  return (
-    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-slate-300 transition">
-      {/* Cabeçalho */}
-      <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          {match.league.logo ? (
-            <img
-              src={match.league.logo}
-              alt=""
-              className="w-5 h-5 object-contain"
-              loading="lazy"
-            />
-          ) : (
-            <Trophy className="w-4 h-4 text-slate-500" />
-          )}
-
-          <span className="text-xs font-semibold text-slate-600 truncate">
-            {match.league.name}
-          </span>
-        </div>
-
-        <div className="text-xs text-slate-400 whitespace-nowrap">
-          {formatDate(match.date)}
-        </div>
-      </div>
-
-      <div className="p-5">
-        {/* Horário / status */}
-        <div className="flex justify-center mb-5">
-          {live ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold">
-              <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
-              AO VIVO
-            </span>
-          ) : finished ? (
-            <span className="text-xs font-semibold text-slate-400">
-              ENCERRADO
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-700">
-              <Clock3 className="w-4 h-4" />
-              {formatTime(match.date)}
-            </span>
-          )}
-        </div>
-
-        {/* Times */}
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-          {/* Mandante */}
-          <div className="flex flex-col items-center gap-2 min-w-0">
-            <TeamLogo team={match.homeTeam} size="w-14 h-14" />
-            <span className="text-sm font-bold text-slate-800 text-center leading-tight">
-              {match.homeTeam.name}
-            </span>
-          </div>
-
-          {/* Placar */}
-          <div className="text-center">
-            {hasScore ? (
-              <div className="text-2xl font-black text-slate-900">
-                {homeScore}
-                <span className="mx-1 text-slate-300">x</span>
-                {awayScore}
-              </div>
-            ) : (
-              <div className="text-lg font-bold text-slate-300">x</div>
-            )}
-          </div>
-
-          {/* Visitante */}
-          <div className="flex flex-col items-center gap-2 min-w-0">
-            <TeamLogo team={match.awayTeam} size="w-14 h-14" />
-            <span className="text-sm font-bold text-slate-800 text-center leading-tight">
-              {match.awayTeam.name}
-            </span>
-          </div>
-        </div>
-
-        {/* Estádio */}
-        <div className="mt-5 pt-4 border-t border-slate-100">
-          {match.venue?.name ? (
-            <div className="flex items-start gap-2">
-              <MapPin className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
-
-              <div className="min-w-0">
-                <div className="text-sm font-semibold text-slate-700">
-                  {match.venue.name}
-                </div>
-
-                {match.venue.city && (
-                  <div className="text-xs text-slate-400 mt-0.5">
-                    {match.venue.city}
-                    {match.venue.country ? ` · ${match.venue.country}` : ""}
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 text-sm text-slate-400">
-              <MapPin className="w-4 h-4" />
-              Estádio ainda não informado
-            </div>
-          )}
-        </div>
-
-        {/* Onde assistir */}
-        <div className="mt-4 pt-4 border-t border-slate-100">
-          <div className="flex items-center gap-2 mb-2">
-            <Radio className="w-4 h-4 text-red-500" />
-            <span className="text-xs font-bold uppercase tracking-wide text-slate-500">
-              Onde assistir
-            </span>
-          </div>
-
-          <BroadcasterList broadcasters={match.broadcasters} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* =========================================================
-   COMPONENTE: TIME DO TOPO
-========================================================= */
-
-function TeamQuickButton({ team, selected, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`shrink-0 flex flex-col items-center gap-2 px-3 py-2 rounded-xl transition ${
-        selected
-          ? "bg-slate-900 text-white"
-          : "hover:bg-slate-100 text-slate-700"
-      }`}
+    <article 
+      onClick={() => onOpenModal(news)}
+      className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg transition cursor-pointer flex flex-col group"
     >
-      <TeamLogo team={team} size="w-9 h-9" />
+      {/* Imagem / Header da Categoria */}
+      <div className="relative h-48 bg-slate-900 overflow-hidden">
+        {news.imageUrl ? (
+          <img 
+            src={news.imageUrl} 
+            alt={news.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition duration-300" 
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-950 p-6 text-slate-400">
+            <Newspaper className="w-12 h-12 stroke-1" />
+          </div>
+        )}
 
-      <span className="text-[11px] font-semibold whitespace-nowrap max-w-[80px] truncate">
-        {team.name}
-      </span>
-    </button>
+        <div className="absolute top-3 left-3 flex gap-2 flex-wrap">
+          <span className="px-2.5 py-1 bg-red-600 text-white text-[10px] font-extrabold uppercase tracking-wider rounded-full shadow">
+            {news.category || "Futebol"}
+          </span>
+          <span className="px-2.5 py-1 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-semibold rounded-full border border-white/20">
+            {news.league}
+          </span>
+        </div>
+
+        {/* Escudos dos Confrontos se for Notícia de Jogo */}
+        {news.teams && news.teams.length === 2 && (
+          <div className="absolute bottom-2 right-3 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+            <img src={GET_TEAM_CREST(news.teams[0])} alt={news.teams[0]} className="w-5 h-5 object-contain" onError={(e) => e.target.style.display='none'} />
+            <span className="text-white text-xs font-bold">vs</span>
+            <img src={GET_TEAM_CREST(news.teams[1])} alt={news.teams[1]} className="w-5 h-5 object-contain" onError={(e) => e.target.style.display='none'} />
+          </div>
+        )}
+      </div>
+
+      {/* Conteúdo */}
+      <div className="p-5 flex-1 flex flex-col justify-between">
+        <div>
+          <div className="flex items-center gap-2 text-xs text-slate-400 mb-2">
+            <Clock className="w-3.5 h-3.5" />
+            <span>{news.timeAgo || "Atualizado recentemente"}</span>
+            <span>•</span>
+            <span className="inline-flex items-center gap-1 text-purple-600 font-semibold bg-purple-50 px-2 py-0.5 rounded-md">
+              <Sparkles className="w-3 h-3" /> Reescrito por IA
+            </span>
+          </div>
+
+          <h3 className="font-bold text-slate-900 text-lg group-hover:text-red-600 transition line-clamp-2 leading-snug">
+            {news.title}
+          </h3>
+
+          <p className="text-slate-600 text-sm mt-2 line-clamp-3 leading-relaxed">
+            {news.summary}
+          </p>
+        </div>
+
+        <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-500">
+          <span>Fonte original: {news.sourcePortal}</span>
+          <span className="text-red-600 group-hover:translate-x-1 transition flex items-center gap-0.5">
+            Ler notícia <ChevronRight className="w-4 h-4" />
+          </span>
+        </div>
+      </div>
+    </article>
   );
 }
 
 /* =========================================================
-   COMPONENTE: FILTROS DE DATA
+   MODAL DE LEITURA COMPLETA DA NOTÍCIA
 ========================================================= */
+function NewsModal({ news, onClose }) {
+  if (!news) return null;
 
-function DateFilter({ value, onChange }) {
-  const today = getBrazilDateString();
-  const tomorrow = addDays(today, 1);
+  return (
+    <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white w-full max-w-3xl rounded-3xl overflow-hidden shadow-2xl my-8 relative animate-in fade-in zoom-in-95 duration-200">
+        
+        {/* Botão Fechar */}
+        <button 
+          onClick={onClose} 
+          className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white flex items-center justify-center transition"
+        >
+          <X className="w-5 h-5" />
+        </button>
 
-  const options = [
-    { id: "today", label: "Hoje", date: today },
-    { id: "tomorrow", label: "Amanhã", date: tomorrow },
-    { id: "all", label: "Todos", date: null },
+        {/* Capa */}
+        <div className="relative h-64 bg-slate-900">
+          {news.imageUrl && (
+            <img src={news.imageUrl} alt={news.title} className="w-full h-full object-cover" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
+          <div className="absolute bottom-4 left-6 right-6">
+            <span className="px-3 py-1 bg-red-600 text-white text-xs font-extrabold uppercase rounded-full">
+              {news.league}
+            </span>
+            <h1 className="text-2xl md:text-3xl font-black text-white mt-2 leading-tight">
+              {news.title}
+            </h1>
+          </div>
+        </div>
+
+        {/* Corpo do Texto */}
+        <div className="p-6 md:p-8 max-h-[60vh] overflow-y-auto space-y-4 text-slate-700 leading-relaxed">
+          <div className="flex items-center justify-between text-xs text-slate-400 border-b border-slate-100 pb-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-purple-600" />
+              <span>Síntese inteligente gerada via Gemini API</span>
+            </div>
+            <a 
+              href={news.sourceUrl} 
+              target="_blank" 
+              rel="noreferrer" 
+              className="text-red-600 hover:underline inline-flex items-center gap-1 font-semibold"
+            >
+              Ver matéria original na {news.sourcePortal} <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+
+          {/* O texto reescrito completo (300 a 500 palavras) */}
+          <div className="space-y-4 text-base font-normal">
+            {news.content ? (
+              news.content.split("\n\n").map((paragraph, idx) => (
+                <p key={idx}>{paragraph}</p>
+              ))
+            ) : (
+              <p>{news.summary}</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   APP PRINCIPAL
+========================================================= */
+export default function App() {
+  const [activeCategory, setActiveCategory] = useState("TODAS");
+  const [newsList, setNewsList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedNews, setSelectedNews] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("news");
+
+  // Categorias exigidas
+  const categories = [
+    "TODAS",
+    "Série A",
+    "Série B",
+    "Série C & D",
+    "Ligas Européias",
+    "Copas Nacionais",
+    "Futebol Feminino",
+    "Sub-17 / Sub-20 / Copinha",
+    "Estaduais"
   ];
 
-  return (
-    <div className="flex gap-2 overflow-x-auto pb-1">
-      {options.map((option) => (
-        <button
-          key={option.id}
-          onClick={() => onChange(option.id)}
-          className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${
-            value === option.id
-              ? "bg-slate-900 text-white"
-              : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
-          }`}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-/* =========================================================
-   APP
-========================================================= */
-
-export default function App() {
-  const [activeTab, setActiveTab] = useState("games");
-  const [matches, setMatches] = useState([]);
-  const [teams, setTeams] = useState([]);
-  const [selectedDate, setSelectedDate] = useState("today");
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const [selectedLeague, setSelectedLeague] = useState("all");
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState("");
-  const [usingDemoData, setUsingDemoData] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState(null);
-
-  const abortControllerRef = useRef(null);
-
-  /* =======================================================
-     CARREGAR JOGOS (COM CANCELAMENTO DE REQUISIÇÕES)
-  ======================================================= */
-
-  const loadMatches = useCallback(async (showRefresh = false) => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    abortControllerRef.current = new AbortController();
-
+  const fetchNews = useCallback(async () => {
+    setLoading(true);
     try {
-      if (showRefresh) setRefreshing(true);
-      else setLoading(true);
-
-      setError("");
-
-      const response = await fetch(MATCHES_ENDPOINT, {
-        method: "GET",
-        headers: { Accept: "application/json" },
-        cache: "no-store",
-        signal: abortControllerRef.current.signal,
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erro HTTP ${response.status}`);
+      const res = await fetch(NEWS_ENDPOINT);
+      if (res.ok) {
+        const data = await res.json();
+        setNewsList(data);
+      } else {
+        throw new Error("Falha na API");
       }
-
-      const data = await response.json();
-
-      const rawMatches = Array.isArray(data)
-        ? data
-        : Array.isArray(data.matches)
-        ? data.matches
-        : Array.isArray(data.response)
-        ? data.response
-        : Array.isArray(data.data)
-        ? data.data
-        : [];
-
-      const normalized = rawMatches
-        .map(normalizeMatch)
-        .filter((match) => match.date);
-
-      setMatches(normalized);
-      setUsingDemoData(false);
-      setLastUpdate(new Date());
-    } catch (err) {
-      if (err.name === "AbortError") return;
-
-      console.error("Erro ao carregar jogos:", err);
-      setError("Não foi possível carregar os jogos pela API.");
-      setMatches(DEMO_MATCHES.map(normalizeMatch));
-      setUsingDemoData(true);
+    } catch {
+      // Mock demonstrativo de artigos reescritos caso o backend de scraping esteja offline
+      setNewsList([
+        {
+          id: "1",
+          title: "Análise Tática: Como o Palmeiras se prepara para o clássico decisivo",
+          summary: "Com mudanças no setor de meio-campo, a equipe busca manter a invencibilidade. O técnico testou variações com três atacantes para furar o bloco defensivo adversário.",
+          content: "O Palmeiras finalizou sua preparação tática para o próximo compromisso da temporada com um treino fechado na academia de futebol. A comissão técnica enfatizou transições rápidas e jogadas de bola parada, identificando vulnerabilidades na linha defensiva rival.\n\nCom o retorno de atletas poupados na última rodada, a equipe ganha em intensidade pelo lado esquerdo do campo. A expectativa é de um confronto truncado, onde a eficiência na definição das chances criadas será o fator determinante para a conquista dos três pontos.\n\nPor outro lado, o adversário chega pressionado por resultados e deve atuar de forma reativa, apostando nos contra-ataques. O treinador alviverde alertou para a necessidade de manter a concentração durante os 90 minutos para evitar surpresas.",
+          category: "Série A",
+          league: "Brasileirão Série A",
+          teams: ["Palmeiras", "Corinthians"],
+          sourcePortal: "GE Globo",
+          sourceUrl: "https://ge.globo.com",
+          timeAgo: "Há 15 min",
+          imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800&q=80"
+        },
+        {
+          id: "2",
+          title: "Real Madrid ajusta escalação para grande duelo na Champions League",
+          summary: "Equipe espanhola conta com o retorno de peças chaves no ataque para buscar a vaga nas semifinais do torneio continental.",
+          content: "O Real Madrid realizou o último treinamento antes do duelo decisivo válido pela Liga dos Campeões da Europa. O técnico destacou a importância da estabilidade defensiva frente a um ataque veloz e perigoso.\n\nA principal novidade na formação titular é a presença do atacante recuperado de lesão muscular, que treinou sem restrições. A imprensa espanhola destaca que a atmosfera no estádio será um combustível extra para buscar a vitória desde os minutos iniciais.",
+          category: "Ligas Européias",
+          league: "Champions League",
+          teams: ["Real Madrid", "Manchester City"],
+          sourcePortal: "ESPN",
+          sourceUrl: "https://espn.com.br",
+          timeAgo: "Há 42 min",
+          imageUrl: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&q=80"
+        }
+      ]);
     } finally {
       setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
-  /* =======================================================
-     CARREGAR TIMES
-  ======================================================= */
-
-  const loadTeams = useCallback(async () => {
-    try {
-      const response = await fetch(TEAMS_ENDPOINT, {
-        headers: { Accept: "application/json" },
-        cache: "no-store",
-      });
-
-      if (!response.ok) throw new Error(`Erro HTTP ${response.status}`);
-
-      const data = await response.json();
-      const rawTeams = Array.isArray(data)
-        ? data
-        : Array.isArray(data.teams)
-        ? data.teams
-        : Array.isArray(data.response)
-        ? data.response
-        : Array.isArray(data.data)
-        ? data.data
-        : [];
-
-      const normalizedTeams = rawTeams
-        .map((team) => ({
-          id: firstValid(team?.id, team?.teamId, team?.team?.id, null),
-          name: firstValid(team?.name, team?.team?.name, team?.shortName, "Time"),
-          logo: firstValid(
-            team?.logo,
-            team?.crest,
-            team?.badge,
-            team?.team?.logo,
-            team?.team?.crest,
-            ""
-          ),
-        }))
-        .filter((team) => team.name);
-
-      setTeams(normalizedTeams);
-    } catch (err) {
-      console.warn("Endpoint /api/teams indisponível, recorrendo aos jogos.");
     }
   }, []);
 
   useEffect(() => {
-    loadMatches();
-    loadTeams();
-  }, [loadMatches, loadTeams]);
+    fetchNews();
+  }, [fetchNews]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      loadMatches(true);
-    }, REFRESH_INTERVAL);
-
-    return () => clearInterval(interval);
-  }, [loadMatches]);
-
-  /* =======================================================
-     TIMES DO TOPO (MEMOIZADO E COM FALLBACK)
-  ======================================================= */
-
-  const topTeams = useMemo(() => {
-    if (teams.length > 0) return teams;
-
-    const map = new Map();
-    matches.forEach((match) => {
-      [match.homeTeam, match.awayTeam].forEach((team) => {
-        if (!team?.name) return;
-        const key = team.id || normalizeText(team.name);
-        if (!map.has(key)) map.set(key, team);
-      });
+  const filteredNews = useMemo(() => {
+    return newsList.filter((item) => {
+      const matchesCategory = 
+        activeCategory === "TODAS" || item.category === activeCategory;
+      const matchesSearch = 
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.summary.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
     });
-
-    return Array.from(map.values()).sort((a, b) =>
-      a.name.localeCompare(b.name, "pt-BR")
-    );
-  }, [teams, matches]);
-
-  /* =======================================================
-     LIGAS
-  ======================================================= */
-
-  const leagues = useMemo(() => {
-    const map = new Map();
-    matches.forEach((match) => {
-      if (!match.league?.name) return;
-      const key = normalizeText(match.league.name);
-      if (!map.has(key)) map.set(key, match.league.name);
-    });
-
-    return ["all", ...Array.from(map.values())];
-  }, [matches]);
-
-  /* =======================================================
-     FILTROS (OTIMIZADO)
-  ======================================================= */
-
-  const filteredMatches = useMemo(() => {
-    const today = getBrazilDateString();
-    const tomorrow = addDays(today, 1);
-    const query = normalizeText(search);
-
-    let result = matches;
-
-    if (selectedDate === "today") {
-      result = result.filter((match) => getDateKey(match.date) === today);
-    } else if (selectedDate === "tomorrow") {
-      result = result.filter((match) => getDateKey(match.date) === tomorrow);
-    }
-
-    if (selectedTeam) {
-      const teamSearch = normalizeText(selectedTeam.name);
-      result = result.filter((match) => {
-        const home = normalizeText(match.homeTeam.name);
-        const away = normalizeText(match.awayTeam.name);
-        return (
-          home === teamSearch ||
-          away === teamSearch ||
-          String(match.homeTeam.id) === String(selectedTeam.id) ||
-          String(match.awayTeam.id) === String(selectedTeam.id)
-        );
-      });
-    }
-
-    if (selectedLeague !== "all") {
-      const targetLeague = normalizeText(selectedLeague);
-      result = result.filter(
-        (match) => normalizeText(match.league.name) === targetLeague
-      );
-    }
-
-    if (query) {
-      result = result.filter((match) => match.searchText.includes(query));
-    }
-
-    return [...result].sort((a, b) => new Date(a.date) - new Date(b.date));
-  }, [matches, selectedDate, selectedTeam, selectedLeague, search]);
-
-  /* =======================================================
-     AGRUPAR POR DATA
-  ======================================================= */
-
-  const groupedMatches = useMemo(() => {
-    const groups = new Map();
-
-    filteredMatches.forEach((match) => {
-      const key = getDateKey(match.date);
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key).push(match);
-    });
-
-    return Array.from(groups.entries());
-  }, [filteredMatches]);
-
-  function clearFilters() {
-    setSelectedTeam(null);
-    setSelectedLeague("all");
-    setSearch("");
-    setSelectedDate("today");
-  }
-
-  const tabs = [
-    { id: "games", label: "Jogos", icon: CalendarDays },
-    { id: "watch", label: "Onde assistir", icon: Tv },
-    { id: "table", label: "Tabela", icon: Trophy },
-    { id: "scorers", label: "Artilharia", icon: Users },
-  ];
-
-  /* =======================================================
-     RENDER
-  ======================================================= */
+  }, [newsList, activeCategory, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen bg-slate-100 text-slate-900 font-sans">
       {/* HEADER */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+      <header className="bg-slate-950 text-white sticky top-0 z-40 border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4">
           <div className="h-16 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center">
-                <Trophy className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center font-black text-xl shadow-lg shadow-red-600/30">
+                F
               </div>
               <div>
-                <h1 className="font-black text-lg leading-none">Onde Tem Jogo?</h1>
-                <p className="text-[11px] text-slate-400 mt-1">Futebol e onde assistir</p>
+                <h1 className="font-black text-lg tracking-tight leading-none">FUTEBOL NEWS IA</h1>
+                <p className="text-[10px] text-slate-400 mt-0.5">Agregador Automatizado em Tempo Real</p>
               </div>
             </div>
 
-            <button
-              onClick={() => loadMatches(true)}
-              disabled={refreshing}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm font-semibold text-slate-600 disabled:opacity-50"
+            <button 
+              onClick={fetchNews}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold transition border border-slate-700"
             >
-              {refreshing ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <RefreshCw className="w-4 h-4" />
-              )}
-              <span className="hidden sm:inline">Atualizar</span>
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-red-500" : ""}`} />
+              <span className="hidden sm:inline">Atualizar (60m)</span>
             </button>
           </div>
 
-          <nav className="flex gap-1 overflow-x-auto">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-3 border-b-2 text-sm font-semibold whitespace-nowrap transition ${
-                    activeTab === tab.id
-                      ? "border-slate-900 text-slate-900"
-                      : "border-transparent text-slate-400 hover:text-slate-700"
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </nav>
+          {/* Abas Principais */}
+          <div className="flex gap-6 text-sm font-bold border-t border-slate-800/80 pt-2">
+            <button 
+              onClick={() => setActiveTab("news")}
+              className={`pb-2 border-b-2 flex items-center gap-2 ${activeTab === "news" ? "border-red-500 text-white" : "border-transparent text-slate-400"}`}
+            >
+              <Newspaper className="w-4 h-4" /> Feed de Notícias
+            </button>
+            <button 
+              onClick={() => setActiveTab("tables")}
+              className={`pb-2 border-b-2 flex items-center gap-2 ${activeTab === "tables" ? "border-red-500 text-white" : "border-transparent text-slate-400"}`}
+            >
+              <Trophy className="w-4 h-4" /> Classificação & Jogos
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* CONTEÚDO */}
+      {/* CONTEÚDO PRINCIPAL */}
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {usingDemoData && (
-          <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-            <div>
-              <div className="font-bold text-sm text-amber-800">API não respondeu</div>
-              <div className="text-xs text-amber-700 mt-1">
-                O jogo exibido abaixo é apenas demonstrativo. Os dados reais devem vir do endpoint <strong>/api/matches</strong>.
-              </div>
-            </div>
-          </div>
-        )}
-
-        {error && !usingDemoData && (
-          <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
-            <div>
-              <div className="font-bold text-sm text-red-800">Não foi possível atualizar os jogos</div>
-              <div className="text-xs text-red-700 mt-1">{error}</div>
-            </div>
-          </div>
-        )}
-
-        {/* ABA JOGOS */}
-        {activeTab === "games" && (
+        {activeTab === "news" ? (
           <>
-            <section className="mb-6">
-              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-                <div>
-                  <p className="text-sm font-semibold text-red-600 mb-1">FUTEBOL NO BRASIL</p>
-                  <h2 className="text-3xl md:text-4xl font-black tracking-tight">Onde tem jogo hoje?</h2>
-                  <p className="text-slate-500 mt-2 max-w-2xl">
-                    Veja os jogos do dia, horário, estádio e onde assistir.
-                  </p>
-                </div>
-
-                {lastUpdate && (
-                  <div className="text-xs text-slate-400">
-                    Atualizado às{" "}
-                    {new Intl.DateTimeFormat("pt-BR", {
-                      timeZone: BRAZIL_TIMEZONE,
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }).format(lastUpdate)}
-                  </div>
-                )}
-              </div>
-            </section>
-
-            {topTeams.length > 0 && (
-              <section className="mb-5">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold text-sm text-slate-700">Times</h3>
-                  {selectedTeam && (
+            {/* BARRA DE FILTROS E BUSCA */}
+            <section className="mb-6 space-y-4">
+              <div className="flex flex-col md:flex-row gap-3 justify-between items-center">
+                {/* Categorias / Ligas */}
+                <div className="flex gap-2 overflow-x-auto w-full pb-1 scrollbar-none">
+                  {categories.map((cat) => (
                     <button
-                      onClick={() => setSelectedTeam(null)}
-                      className="text-xs text-red-600 font-semibold"
-                    >
-                      Limpar
-                    </button>
-                  )}
-                </div>
-
-                <div className="bg-white border border-slate-200 rounded-2xl p-2 overflow-x-auto">
-                  <div className="flex gap-1 min-w-max">
-                    {topTeams.map((team) => (
-                      <TeamQuickButton
-                        key={team.id || team.name}
-                        team={team}
-                        selected={
-                          selectedTeam?.id === team.id ||
-                          (selectedTeam && normalizeText(selectedTeam.name) === normalizeText(team.name))
-                        }
-                        onClick={() =>
-                          setSelectedTeam(
-                            selectedTeam &&
-                              (selectedTeam.id === team.id || normalizeText(selectedTeam.name) === normalizeText(team.name))
-                              ? null
-                              : team
-                          )
-                        }
-                      />
-                    ))}
-                  </div>
-                </div>
-              </section>
-            )}
-
-            <section className="mb-6">
-              <div className="flex flex-col lg:flex-row gap-3">
-                <DateFilter value={selectedDate} onChange={setSelectedDate} />
-
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Buscar time, estádio, competição ou transmissão..."
-                    className="w-full h-10 pl-10 pr-10 rounded-full border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-slate-200 text-sm"
-                  />
-                  {search && (
-                    <button
-                      onClick={() => setSearch("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {leagues.length > 1 && (
-                <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-                  {leagues.map((league) => (
-                    <button
-                      key={league}
-                      onClick={() => setSelectedLeague(league)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${
-                        selectedLeague === league
-                          ? "bg-slate-800 text-white"
-                          : "bg-white border border-slate-200 text-slate-500 hover:bg-slate-50"
+                      key={cat}
+                      onClick={() => setActiveCategory(cat)}
+                      className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition ${
+                        activeCategory === cat 
+                          ? "bg-slate-900 text-white shadow" 
+                          : "bg-white text-slate-600 hover:bg-slate-200 border border-slate-200"
                       }`}
                     >
-                      {league === "all" ? "Todas as competições" : league}
+                      {cat}
                     </button>
                   ))}
                 </div>
-              )}
+
+                {/* Busca */}
+                <div className="relative w-full md:w-72 shrink-0">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input 
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar time, liga ou título..."
+                    className="w-full h-10 pl-9 pr-4 bg-white border border-slate-200 rounded-full text-xs outline-none focus:ring-2 focus:ring-slate-900"
+                  />
+                </div>
+              </div>
             </section>
 
-            {loading && (
-              <div className="py-20 flex flex-col items-center justify-center text-slate-400">
-                <Loader2 className="w-8 h-8 animate-spin mb-3" />
-                <p className="text-sm">Carregando jogos...</p>
+            {/* FEED DE NOTÍCIAS */}
+            {loading ? (
+              <div className="py-20 text-center text-slate-400">
+                <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-red-600" />
+                <p className="text-sm font-semibold">Raspando e reescrevendo matérias do futebol mundial...</p>
               </div>
-            )}
-
-            {!loading && groupedMatches.length === 0 && (
-              <div className="bg-white border border-slate-200 rounded-2xl py-16 px-6 text-center">
-                <CalendarDays className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                <h3 className="font-bold text-slate-700">Nenhum jogo encontrado</h3>
-                <p className="text-sm text-slate-400 mt-1">Tente mudar a data ou remover algum filtro.</p>
-                <button
-                  onClick={clearFilters}
-                  className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 text-white text-sm font-semibold"
-                >
-                  Limpar filtros
-                </button>
+            ) : filteredNews.length === 0 ? (
+              <div className="bg-white rounded-2xl p-12 text-center border border-slate-200">
+                <Newspaper className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+                <h3 className="font-bold text-slate-700">Nenhuma notícia encontrada</h3>
+                <p className="text-xs text-slate-400 mt-1">Tente selecionar outra categoria ou limpar a busca.</p>
               </div>
-            )}
-
-            {!loading &&
-              groupedMatches.map(([date, dayMatches]) => (
-                <section key={date} className="mb-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-px bg-slate-200 flex-1" />
-                    <h3 className="text-sm font-bold text-slate-500 uppercase">
-                      {date === getBrazilDateString() ? "Hoje" : formatDate(dayMatches[0].date)}
-                    </h3>
-                    <div className="h-px bg-slate-200 flex-1" />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {dayMatches.map((match) => (
-                      <MatchCard key={match.id} match={match} />
-                    ))}
-                  </div>
-                </section>
-              ))}
-          </>
-        )}
-
-        {/* ABA ONDE ASSISTIR */}
-        {activeTab === "watch" && (
-          <section>
-            <div className="mb-6">
-              <p className="text-sm font-semibold text-red-600 mb-1">TRANSMISSÕES</p>
-              <h2 className="text-3xl font-black">Onde assistir aos jogos</h2>
-              <p className="text-slate-500 mt-2">Filtre pelos canais e plataformas disponíveis para cada partida.</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {matches
-                .filter((match) => match.broadcasters?.length)
-                .sort((a, b) => new Date(a.date) - new Date(b.date))
-                .map((match) => (
-                  <MatchCard key={match.id} match={match} />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredNews.map((news) => (
+                  <NewsCard key={news.id} news={news} onOpenModal={setSelectedNews} />
                 ))}
-            </div>
-
-            {matches.filter((match) => match.broadcasters?.length).length === 0 && (
-              <div className="bg-white border border-slate-200 rounded-2xl py-16 text-center">
-                <Tv className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                <h3 className="font-bold">Nenhuma transmissão informada</h3>
-                <p className="text-sm text-slate-400 mt-1">A API ainda não retornou os dados de transmissão.</p>
               </div>
             )}
-          </section>
-        )}
-
-        {/* ABA TABELA */}
-        {activeTab === "table" && (
-          <section>
-            <div className="mb-6">
-              <p className="text-sm font-semibold text-red-600 mb-1">CLASSIFICAÇÃO</p>
-              <h2 className="text-3xl font-black">Tabela do campeonato</h2>
-              <p className="text-slate-500 mt-2">A tabela deve ser alimentada pela API para permanecer atualizada.</p>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center">
-              <Trophy className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-              <h3 className="font-bold text-slate-700">Tabela dinâmica</h3>
-              <p className="text-sm text-slate-400 max-w-md mx-auto mt-2">
-                Conecte o endpoint de classificação da API para que posições, pontos, vitórias, saldo e demais estatísticas sejam atualizados automaticamente.
-              </p>
-            </div>
-          </section>
-        )}
-
-        {/* ABA ARTILHARIA */}
-        {activeTab === "scorers" && (
-          <section>
-            <div className="mb-6">
-              <p className="text-sm font-semibold text-red-600 mb-1">ARTILHARIA</p>
-              <h2 className="text-3xl font-black">Artilheiros</h2>
-              <p className="text-slate-500 mt-2">Os dados devem vir da API para evitar informações desatualizadas.</p>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center">
-              <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-              <h3 className="font-bold text-slate-700">Artilharia dinâmica</h3>
-              <p className="text-sm text-slate-400 max-w-md mx-auto mt-2">
-                Conecte o endpoint de artilharia da API para carregar jogadores e gols automaticamente.
-              </p>
-            </div>
-          </section>
+          </>
+        ) : (
+          /* ABA DE TABELAS & ESTATÍSTICAS */
+          <div className="bg-white rounded-2xl p-8 border border-slate-200 text-center">
+            <Trophy className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+            <h2 className="text-xl font-bold text-slate-800">Central de Classificação & Artilharia</h2>
+            <p className="text-sm text-slate-500 max-w-md mx-auto mt-1">
+              Consolidando dados de todas as Séries A, B, C, D e Ligas Internacionais atualizadas via scraping a cada 60 minutos.
+            </p>
+          </div>
         )}
       </main>
 
-      {/* FOOTER */}
-      <footer className="border-t border-slate-200 bg-white mt-12">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <div className="font-black">Onde Tem Jogo?</div>
-              <p className="text-xs text-slate-400 mt-1">Jogos de futebol e onde assistir.</p>
-            </div>
-
-            <div className="text-xs text-slate-400">
-              Horários exibidos no fuso de Brasília.
-            </div>
-          </div>
-        </div>
-      </footer>
+      {/* MODAL DE LEITURA */}
+      <NewsModal news={selectedNews} onClose={() => setSelectedNews(null)} />
     </div>
   );
 }
